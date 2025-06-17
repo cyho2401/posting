@@ -313,6 +313,50 @@
       background: #8e44ad;
     }
 
+    /* Toggle Switch */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: #3498db;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: left 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch.active .toggle-slider {
+      left: 28px;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+
     .card {
       background: white;
       border-radius: 12px;
@@ -370,6 +414,44 @@
     .stat-card p {
       opacity: 0.9;
       font-size: 0.9rem;
+    }
+
+    /* Date Grouping Styles */
+    .date-group {
+      margin-bottom: 30px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .date-header {
+      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .date-header:hover {
+      background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    }
+
+    .date-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .date-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .date-content {
+      padding: 20px;
     }
 
     /* Analysis Charts */
@@ -510,7 +592,7 @@
     }
 
     .engineers-content.open {
-      max-height: 2000px;
+      max-height: 3000px;
     }
 
     .engineers-inner {
@@ -571,6 +653,12 @@
       font-size: 14px;
       color: #666;
       line-height: 1.5;
+    }
+
+    .normalized-name {
+      font-size: 12px;
+      color: #999;
+      font-style: italic;
     }
 
     table {
@@ -939,6 +1027,12 @@
 
         <!-- General Search Tab -->
         <div id="generalTab" class="tab-content active">
+          <div class="toggle-container">
+            <div class="toggle-switch" id="engineerToggle" onclick="toggleEngineerFilter()">
+              <div class="toggle-slider"></div>
+            </div>
+            <span class="toggle-label">Show Engineers Only (CE/SE/E/AE)</span>
+          </div>
           <div class="filter-grid">
             <div class="filter-group">
               <label>Name</label>
@@ -1174,7 +1268,11 @@
     let allRanks = new Set();
     let allUnits = new Set();
     let currentUser = null;
-    let engineerRanks = ['Engineer', 'Senior Engineer', 'Chief Engineer', 'Principal Engineer', 'Engineering Manager', 'Assistant Engineer'];
+    let engineerFilterActive = false;
+    
+    // Define engineer ranks more precisely
+    const engineerRanks = ['Chief Engineer', 'Senior Engineer', 'Engineer', 'Assistant Engineer'];
+    const engineerAbbreviations = ['CE', 'SE', 'E', 'AE'];
 
     // Auth state listener
     auth.onAuthStateChanged((user) => {
@@ -1223,6 +1321,64 @@
       loadEngineersSection();
     }
 
+    // Normalize name (remove titles like Miss/Ms/Mr)
+    function normalizeName(name) {
+      if (!name) return '';
+      
+      // Remove common titles
+      const titles = ['Miss', 'Ms', 'Mr', 'Mrs', 'Dr', 'Prof'];
+      let normalized = name;
+      
+      titles.forEach(title => {
+        const regex = new RegExp(`^${title}\\.?\\s+`, 'i');
+        normalized = normalized.replace(regex, '');
+      });
+      
+      return normalized.trim();
+    }
+
+    // Check if rank is engineer
+    function isEngineerRank(rank) {
+      if (!rank) return false;
+      
+      const rankLower = rank.toLowerCase();
+      
+      // Check full engineer ranks
+      for (let er of engineerRanks) {
+        if (rankLower === er.toLowerCase()) return true;
+      }
+      
+      // Check abbreviations
+      for (let abbr of engineerAbbreviations) {
+        if (rank === abbr || rank === abbr + '/') return true;
+      }
+      
+      // Check if contains engineer but not other professions
+      if (rankLower.includes('engineer') && 
+          !rankLower.includes('surveyor') && 
+          !rankLower.includes('architect') &&
+          !rankLower.includes('planner')) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Toggle engineer filter
+    function toggleEngineerFilter() {
+      const toggle = document.getElementById('engineerToggle');
+      engineerFilterActive = !engineerFilterActive;
+      
+      if (engineerFilterActive) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+      
+      // Re-run current search with new filter
+      searchPostings();
+    }
+
     // Load all data from Firestore
     async function loadAllData() {
       try {
@@ -1234,6 +1390,8 @@
         
         snapshot.forEach(doc => {
           const data = { id: doc.id, ...doc.data() };
+          // Add normalized name
+          data.normalizedName = normalizeName(data.name);
           allPostings.push(data);
           
           if (data.name) allPeople.add(data.name);
@@ -1241,6 +1399,10 @@
           if (data.from) allUnits.add(data.from);
           if (data.to) allUnits.add(data.to);
         });
+        
+        // Sort all postings by date
+        allPostings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+        
       } catch (error) {
         console.error("Error loading data:", error);
       }
@@ -1254,10 +1416,8 @@
       document.getElementById('unitCount').textContent = allUnits.size;
       
       // Count engineers
-      const engineers = allPostings.filter(p => 
-        p.rank && engineerRanks.some(rank => p.rank.toLowerCase().includes(rank.toLowerCase()))
-      );
-      const uniqueEngineers = new Set(engineers.map(e => e.name));
+      const engineers = allPostings.filter(p => isEngineerRank(p.rank));
+      const uniqueEngineers = new Set(engineers.map(e => e.normalizedName));
       document.getElementById('engineerCount').textContent = uniqueEngineers.size;
       
       // Count promotions
@@ -1270,16 +1430,17 @@
       const promotions = [];
       const peoplePostings = {};
       
-      // Group postings by person
+      // Group postings by normalized name
       allPostings.forEach(posting => {
-        if (!peoplePostings[posting.name]) {
-          peoplePostings[posting.name] = [];
+        const normalizedName = posting.normalizedName;
+        if (!peoplePostings[normalizedName]) {
+          peoplePostings[normalizedName] = [];
         }
-        peoplePostings[posting.name].push(posting);
+        peoplePostings[normalizedName].push(posting);
       });
       
       // Check for promotions
-      Object.entries(peoplePostings).forEach(([name, postings]) => {
+      Object.entries(peoplePostings).forEach(([normalizedName, postings]) => {
         postings.sort((a, b) => (a.dateFrom || '').localeCompare(b.dateFrom || ''));
         
         for (let i = 1; i < postings.length; i++) {
@@ -1288,7 +1449,8 @@
           
           if (prevRank && currRank && isPromotion(prevRank, currRank)) {
             promotions.push({
-              name: name,
+              name: postings[i].name,
+              normalizedName: normalizedName,
               fromRank: prevRank,
               toRank: currRank,
               date: postings[i].dateFrom,
@@ -1303,16 +1465,29 @@
 
     // Check if rank change is a promotion
     function isPromotion(fromRank, toRank) {
-      const rankHierarchy = [
-        'Assistant', 'Junior', '', 'Senior', 'Chief', 'Principal', 'Manager', 'Director'
-      ];
+      // Define rank hierarchy
+      const rankHierarchy = {
+        'Assistant': 1,
+        'AE': 1,
+        'Junior': 2,
+        '': 3,
+        'E': 3,
+        'Senior': 4,
+        'SE': 4,
+        'Chief': 5,
+        'CE': 5,
+        'Principal': 6,
+        'Manager': 7,
+        'Director': 8
+      };
       
-      let fromLevel = -1;
-      let toLevel = -1;
+      let fromLevel = 0;
+      let toLevel = 0;
       
-      rankHierarchy.forEach((level, index) => {
-        if (fromRank.toLowerCase().includes(level.toLowerCase())) fromLevel = index;
-        if (toRank.toLowerCase().includes(level.toLowerCase())) toLevel = index;
+      // Check each hierarchy level
+      Object.entries(rankHierarchy).forEach(([key, level]) => {
+        if (fromRank.includes(key)) fromLevel = Math.max(fromLevel, level);
+        if (toRank.includes(key)) toLevel = Math.max(toLevel, level);
       });
       
       return toLevel > fromLevel;
@@ -1338,6 +1513,192 @@
         content.classList.remove('active');
       });
       document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+
+    // Search postings
+    async function searchPostings() {
+      const name = document.getElementById('searchName').value.trim();
+      const rank = document.getElementById('searchRank').value;
+      const noticeId = document.getElementById('searchNoticeId').value.trim();
+      const noticeType = document.getElementById('searchNoticeType').value;
+
+      const status = document.getElementById('searchStatus');
+      status.innerHTML = '<span class="loader"></span> Searching...';
+      status.className = 'status info';
+
+      try {
+        let results = allPostings;
+        
+        // Apply name filter with normalization
+        if (name) {
+          const searchNameNormalized = normalizeName(name).toLowerCase();
+          results = results.filter(p => {
+            return p.name && (
+              p.name.toLowerCase().includes(name.toLowerCase()) ||
+              p.normalizedName.toLowerCase().includes(searchNameNormalized)
+            );
+          });
+        }
+        
+        if (rank) {
+          results = results.filter(p => p.rank === rank);
+        }
+        if (noticeId) {
+          results = results.filter(p => p.noticeId === noticeId);
+        }
+        if (noticeType) {
+          results = results.filter(p => p.noticeType === noticeType);
+        }
+        
+        // Apply engineer filter if active
+        if (engineerFilterActive) {
+          results = results.filter(p => isEngineerRank(p.rank));
+        }
+        
+        // Sort by date
+        results.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+        
+        renderResultsGrouped(results);
+        showStatus(status, 'success', `Found ${results.length} results${engineerFilterActive ? ' (Engineers only)' : ''}`);
+
+      } catch (error) {
+        showStatus(status, 'error', `❌ Search error: ${error.message}`);
+      }
+    }
+
+    // Render results grouped by date
+    function renderResultsGrouped(data) {
+      const container = document.getElementById('results');
+      
+      if (data.length === 0) {
+        container.innerHTML = '<p class="no-results">No results found. Try adjusting your search criteria.</p>';
+        return;
+      }
+
+      // Group by date
+      const groupedByDate = {};
+      data.forEach(posting => {
+        const date = posting.dateFrom || 'No Date';
+        if (!groupedByDate[date]) {
+          groupedByDate[date] = [];
+        }
+        groupedByDate[date].push(posting);
+      });
+
+      let html = `<p style="margin-bottom: 20px;">Showing ${data.length} result(s)</p>`;
+      
+      // Sort dates in descending order
+      const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
+        if (a === 'No Date') return 1;
+        if (b === 'No Date') return -1;
+        return b.localeCompare(a);
+      });
+
+      sortedDates.forEach(date => {
+        const postings = groupedByDate[date];
+        
+        html += `
+          <div class="date-group">
+            <div class="date-header">
+              <h3>${date}</h3>
+              <span class="date-badge">${postings.length} posting(s)</span>
+            </div>
+            <div class="date-content">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Rank</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Date To</th>
+                    <th>Notice</th>
+                    <th>Remarks</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        postings.forEach(d => {
+          html += `<tr onclick="viewPostingDetails('${d.id}')" style="cursor: pointer;">
+            <td>
+              <span class="clickable-name">${d.name}</span>
+              ${d.name !== d.normalizedName ? `<br><span class="normalized-name">(${d.normalizedName})</span>` : ''}
+            </td>
+            <td>${d.rank || '—'}</td>
+            <td>${d.from || '—'}</td>
+            <td>${d.to || '—'}</td>
+            <td>${d.dateTo || 'Present'}</td>
+            <td>${d.noticeId}<br><small style="color: #666;">${d.noticeType}</small></td>
+            <td>${d.remarks || '—'}</td>
+            <td onclick="event.stopPropagation()">
+              <button class="btn-danger" onclick="deletePosting('${d.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
+            </td>
+          </tr>`;
+        });
+
+        html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Advanced search
+    function advancedSearch() {
+      const dateFromStart = document.getElementById('dateFromStart').value;
+      const dateFromEnd = document.getElementById('dateFromEnd').value;
+      const dateToStart = document.getElementById('dateToStart').value;
+      const dateToEnd = document.getElementById('dateToEnd').value;
+      const fromUnit = document.getElementById('fromUnit').value.toLowerCase();
+      const toUnit = document.getElementById('toUnit').value.toLowerCase();
+      const remarksContains = document.getElementById('remarksContains').value.toLowerCase();
+      const sortBy = document.getElementById('sortBy').value;
+      
+      let results = allPostings;
+      
+      if (dateFromStart) {
+        results = results.filter(p => p.dateFrom >= dateFromStart);
+      }
+      if (dateFromEnd) {
+        results = results.filter(p => p.dateFrom <= dateFromEnd);
+      }
+      if (dateToStart) {
+        results = results.filter(p => p.dateTo >= dateToStart);
+      }
+      if (dateToEnd) {
+        results = results.filter(p => p.dateTo <= dateToEnd);
+      }
+      if (fromUnit) {
+        results = results.filter(p => p.from && p.from.toLowerCase().includes(fromUnit));
+      }
+      if (toUnit) {
+        results = results.filter(p => p.to && p.to.toLowerCase().includes(toUnit));
+      }
+      if (remarksContains) {
+        results = results.filter(p => p.remarks && p.remarks.toLowerCase().includes(remarksContains));
+      }
+      
+      const [field, order] = sortBy.split('_');
+      results.sort((a, b) => {
+        let aVal = a[field] || '';
+        let bVal = b[field] || '';
+        
+        if (order === 'asc') {
+          return aVal.localeCompare(bVal);
+        } else {
+          return bVal.localeCompare(aVal);
+        }
+      });
+      
+      renderResultsGrouped(results);
+      const status = document.getElementById('searchStatus');
+      showStatus(status, 'success', `Found ${results.length} results with advanced filters`);
     }
 
     // Analyze data
@@ -1377,11 +1738,12 @@
       const maxRankCount = Math.max(...sortedRanks.map(r => r[1]));
       sortedRanks.forEach(([rank, count]) => {
         const percentage = (count / maxRankCount) * 100;
+        const isEngineer = isEngineerRank(rank);
         html += `
           <div class="chart-bar">
-            <div class="chart-label">${rank}</div>
+            <div class="chart-label">${rank}${isEngineer ? ' 👷' : ''}</div>
             <div class="bar-wrapper">
-              <div class="bar-fill" style="width: ${percentage}%">
+              <div class="bar-fill" style="width: ${percentage}%; ${isEngineer ? 'background: linear-gradient(to right, #9b59b6, #8e44ad);' : ''}">
                 ${count}
               </div>
             </div>
@@ -1539,9 +1901,7 @@
 
     // Load engineers section
     function loadEngineersSection() {
-      const engineers = allPostings.filter(p => 
-        p.rank && engineerRanks.some(rank => p.rank.toLowerCase().includes(rank.toLowerCase()))
-      );
+      const engineers = allPostings.filter(p => isEngineerRank(p.rank));
       
       // Group by rank
       const engineersByRank = {};
@@ -1556,13 +1916,22 @@
       const filtersDiv = document.getElementById('engineerFilters');
       filtersDiv.innerHTML = '<button class="engineer-rank-tab active" onclick="filterEngineers(\'all\')">All Engineers</button>';
       
-      Object.keys(engineersByRank).sort().forEach(rank => {
+      // Sort ranks by hierarchy
+      const rankOrder = ['Chief Engineer', 'CE', 'Senior Engineer', 'SE', 'Engineer', 'E', 'Assistant Engineer', 'AE'];
+      const sortedRanks = Object.keys(engineersByRank).sort((a, b) => {
+        const aIndex = rankOrder.findIndex(r => a.includes(r));
+        const bIndex = rankOrder.findIndex(r => b.includes(r));
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        return a.localeCompare(b);
+      });
+      
+      sortedRanks.forEach(rank => {
         filtersDiv.innerHTML += `<button class="engineer-rank-tab" onclick="filterEngineers('${rank}')">${rank} (${engineersByRank[rank].length})</button>`;
       });
       
       // Stats
       const statsDiv = document.getElementById('engineersStats');
-      const uniqueEngineers = new Set(engineers.map(e => e.name));
+      const uniqueEngineers = new Set(engineers.map(e => e.normalizedName));
       statsDiv.innerHTML = `
         <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
           <strong>Total Engineering Postings:</strong> ${engineers.length} | 
@@ -1586,9 +1955,7 @@
       // Filter data
       let filteredEngineers;
       if (rank === 'all') {
-        filteredEngineers = allPostings.filter(p => 
-          p.rank && engineerRanks.some(r => p.rank.toLowerCase().includes(r.toLowerCase()))
-        );
+        filteredEngineers = allPostings.filter(p => isEngineerRank(p.rank));
       } else {
         filteredEngineers = allPostings.filter(p => p.rank === rank);
       }
@@ -1607,7 +1974,10 @@
       engineers.forEach(eng => {
         html += `
           <div class="engineer-card" onclick="viewPostingDetails('${eng.id}')">
-            <div class="engineer-name">${eng.name}</div>
+            <div class="engineer-name">
+              ${eng.name}
+              ${eng.name !== eng.normalizedName ? `<br><span class="normalized-name">(${eng.normalizedName})</span>` : ''}
+            </div>
             <div class="engineer-details">
               <strong>${eng.rank}</strong><br>
               ${eng.from || 'N/A'} → ${eng.to || 'N/A'}<br>
@@ -1622,125 +1992,6 @@
       container.innerHTML = html;
     }
 
-    // View posting details
-    function viewPostingDetails(postingId) {
-      const posting = allPostings.find(p => p.id === postingId);
-      if (!posting) return;
-      
-      const modal = document.getElementById('detailModal');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalBody = document.getElementById('modalBody');
-      
-      modalTitle.textContent = 'Posting Details';
-      
-      let html = `
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #2c3e50; margin-bottom: 15px;">${posting.name}</h3>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <div>
-              <strong>Rank:</strong> ${posting.rank || 'N/A'}
-            </div>
-            <div>
-              <strong>Notice ID:</strong> ${posting.noticeId}
-            </div>
-            <div>
-              <strong>Notice Type:</strong> ${posting.noticeType}
-            </div>
-            <div>
-              <strong>Date:</strong> ${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}
-            </div>
-            <div style="grid-column: span 2;">
-              <strong>From:</strong> ${posting.from || 'N/A'}
-            </div>
-            <div style="grid-column: span 2;">
-              <strong>To:</strong> ${posting.to || 'N/A'}
-            </div>
-            ${posting.remarks ? `
-            <div style="grid-column: span 2;">
-              <strong>Remarks:</strong> ${posting.remarks}
-            </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
-      
-      // Check for promotion
-      const promotions = detectPromotions();
-      const isPromotion = promotions.find(p => p.posting.id === postingId);
-      if (isPromotion) {
-        html += `
-          <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <strong style="color: #155724;">🎉 This posting represents a promotion!</strong><br>
-            ${isPromotion.fromRank} → ${isPromotion.toRank}
-          </div>
-        `;
-      }
-      
-      // Find related postings
-      const relatedByPerson = allPostings.filter(p => 
-        p.id !== postingId && p.name === posting.name
-      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      const relatedByPosition = allPostings.filter(p => 
-        p.id !== postingId && (
-          (posting.from && (p.from === posting.from || p.to === posting.from)) ||
-          (posting.to && (p.from === posting.to || p.to === posting.to))
-        )
-      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      if (relatedByPerson.length > 0) {
-        html += `
-          <div class="related-section">
-            <h3>Other Postings for ${posting.name}</h3>
-        `;
-        relatedByPerson.forEach(related => {
-          html += `
-            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
-              <div style="font-weight: 600; margin-bottom: 5px;">
-                ${related.from || 'N/A'} → ${related.to || 'N/A'}
-              </div>
-              <div style="font-size: 14px; color: #666;">
-                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'} • 
-                ${related.noticeId} (${related.noticeType})
-              </div>
-            </div>
-          `;
-        });
-        html += '</div>';
-      }
-      
-      if (relatedByPosition.length > 0) {
-        html += `
-          <div class="related-section">
-            <h3>Related Position Movements</h3>
-        `;
-        relatedByPosition.slice(0, 10).forEach(related => {
-          const isRelatedToFrom = posting.from && (related.from === posting.from || related.to === posting.from);
-          const isRelatedToTo = posting.to && (related.from === posting.to || related.to === posting.to);
-          
-          html += `
-            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
-              <div style="font-weight: 600; margin-bottom: 5px;">
-                ${related.name} (${related.rank || 'N/A'})
-              </div>
-              <div style="font-size: 14px; color: #666;">
-                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
-                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'}
-              </div>
-              <div style="font-size: 12px; color: #999; margin-top: 3px;">
-                ${isRelatedToFrom ? `Related to: ${posting.from}` : ''}
-                ${isRelatedToTo ? `Related to: ${posting.to}` : ''}
-              </div>
-            </div>
-          `;
-        });
-        html += '</div>';
-      }
-      
-      modalBody.innerHTML = html;
-      modal.style.display = 'block';
-    }
-
     // Search person suggestions
     function searchPerson() {
       const searchTerm = document.getElementById('personSearch').value.toLowerCase();
@@ -1751,19 +2002,43 @@
         return;
       }
       
-      const matches = Array.from(allPeople)
-        .filter(person => person.toLowerCase().includes(searchTerm))
-        .slice(0, 10);
+      // Search both original and normalized names
+      const peopleMap = new Map();
+      allPostings.forEach(posting => {
+        const normalizedName = posting.normalizedName;
+        if (!peopleMap.has(normalizedName)) {
+          peopleMap.set(normalizedName, {
+            names: new Set(),
+            postings: []
+          });
+        }
+        peopleMap.get(normalizedName).names.add(posting.name);
+        peopleMap.get(normalizedName).postings.push(posting);
+      });
       
-      suggestions.innerHTML = matches.map(person => {
-        const personData = allPostings.filter(p => p.name === person);
-        const rank = personData[0]?.rank || 'Unknown';
-        const postingCount = personData.length;
-        
+      const matches = [];
+      peopleMap.forEach((data, normalizedName) => {
+        const allNames = Array.from(data.names).join(', ');
+        if (normalizedName.toLowerCase().includes(searchTerm) || 
+            allNames.toLowerCase().includes(searchTerm)) {
+          matches.push({
+            normalizedName: normalizedName,
+            displayName: Array.from(data.names)[0],
+            allNames: allNames,
+            rank: data.postings[0]?.rank || 'Unknown',
+            postingCount: data.postings.length
+          });
+        }
+      });
+      
+      suggestions.innerHTML = matches.slice(0, 10).map(person => {
         return `
-          <div class="person-card" onclick="selectPerson('${person}')">
-            <div class="person-name">${person}</div>
-            <div class="person-info">${rank} • ${postingCount} posting(s)</div>
+          <div class="person-card" onclick="selectPerson('${person.displayName}')">
+            <div class="person-name">${person.displayName}</div>
+            <div class="person-info">
+              ${person.rank} • ${person.postingCount} posting(s)
+              ${person.allNames !== person.displayName ? `<br><small>Also as: ${person.allNames}</small>` : ''}
+            </div>
           </div>
         `;
       }).join('');
@@ -1783,8 +2058,9 @@
         return;
       }
       
+      const normalizedSearchName = normalizeName(personName);
       const personPostings = allPostings
-        .filter(p => p.name === personName)
+        .filter(p => p.name === personName || p.normalizedName === normalizedSearchName)
         .sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
       
       if (personPostings.length === 0) {
@@ -1796,11 +2072,17 @@
       const modalTitle = document.getElementById('modalTitle');
       const modalBody = document.getElementById('modalBody');
       
-      modalTitle.textContent = `Posting History: ${personName}`;
+      // Get all name variations
+      const nameVariations = new Set(personPostings.map(p => p.name));
+      const titleText = nameVariations.size > 1 
+        ? `Posting History: ${Array.from(nameVariations).join(' / ')}`
+        : `Posting History: ${personName}`;
+      
+      modalTitle.textContent = titleText;
       
       // Check for promotions
       const promotions = detectPromotions();
-      const personPromotions = promotions.filter(p => p.name === personName);
+      const personPromotions = promotions.filter(p => p.normalizedName === normalizedSearchName);
       
       let html = '';
       
@@ -1828,7 +2110,8 @@
               <div class="timeline-details">
                 <strong>Rank:</strong> ${posting.rank || 'N/A'}<br>
                 <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
-                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}` : ''}
+                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}<br>` : ''}
+                <strong>Name as recorded:</strong> ${posting.name}
                 ${isPromotion ? `<br><strong style="color: #27ae60;">Promoted from ${isPromotion.fromRank}</strong>` : ''}
               </div>
             </div>
@@ -1911,137 +2194,154 @@
       modal.style.display = 'block';
     }
 
-    // Search postings
-    async function searchPostings() {
-      const name = document.getElementById('searchName').value.trim().toLowerCase();
-      const rank = document.getElementById('searchRank').value;
-      const noticeId = document.getElementById('searchNoticeId').value.trim();
-      const noticeType = document.getElementById('searchNoticeType').value;
-
-      const status = document.getElementById('searchStatus');
-      status.innerHTML = '<span class="loader"></span> Searching...';
-      status.className = 'status info';
-
-      try {
-        let results = allPostings;
-        
-        if (name) {
-          results = results.filter(p => p.name && p.name.toLowerCase().includes(name));
-        }
-        if (rank) {
-          results = results.filter(p => p.rank === rank);
-        }
-        if (noticeId) {
-          results = results.filter(p => p.noticeId === noticeId);
-        }
-        if (noticeType) {
-          results = results.filter(p => p.noticeType === noticeType);
-        }
-        
-        renderResults(results);
-        showStatus(status, 'success', `Found ${results.length} results`);
-
-      } catch (error) {
-        showStatus(status, 'error', `❌ Search error: ${error.message}`);
-      }
-    }
-
-    // Advanced search
-    function advancedSearch() {
-      const dateFromStart = document.getElementById('dateFromStart').value;
-      const dateFromEnd = document.getElementById('dateFromEnd').value;
-      const dateToStart = document.getElementById('dateToStart').value;
-      const dateToEnd = document.getElementById('dateToEnd').value;
-      const fromUnit = document.getElementById('fromUnit').value.toLowerCase();
-      const toUnit = document.getElementById('toUnit').value.toLowerCase();
-      const remarksContains = document.getElementById('remarksContains').value.toLowerCase();
-      const sortBy = document.getElementById('sortBy').value;
+    // View posting details
+    function viewPostingDetails(postingId) {
+      const posting = allPostings.find(p => p.id === postingId);
+      if (!posting) return;
       
-      let results = allPostings;
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
       
-      if (dateFromStart) {
-        results = results.filter(p => p.dateFrom >= dateFromStart);
-      }
-      if (dateFromEnd) {
-        results = results.filter(p => p.dateFrom <= dateFromEnd);
-      }
-      if (dateToStart) {
-        results = results.filter(p => p.dateTo >= dateToStart);
-      }
-      if (dateToEnd) {
-        results = results.filter(p => p.dateTo <= dateToEnd);
-      }
-      if (fromUnit) {
-        results = results.filter(p => p.from && p.from.toLowerCase().includes(fromUnit));
-      }
-      if (toUnit) {
-        results = results.filter(p => p.to && p.to.toLowerCase().includes(toUnit));
-      }
-      if (remarksContains) {
-        results = results.filter(p => p.remarks && p.remarks.toLowerCase().includes(remarksContains));
+      modalTitle.textContent = 'Posting Details';
+      
+      let html = `
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: #2c3e50; margin-bottom: 15px;">${posting.name}</h3>
+          ${posting.name !== posting.normalizedName ? `<p style="color: #666; font-style: italic;">Normalized: ${posting.normalizedName}</p>` : ''}
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div>
+              <strong>Rank:</strong> ${posting.rank || 'N/A'}
+              ${isEngineerRank(posting.rank) ? ' 👷' : ''}
+            </div>
+            <div>
+              <strong>Notice ID:</strong> ${posting.noticeId}
+            </div>
+            <div>
+              <strong>Notice Type:</strong> ${posting.noticeType}
+            </div>
+            <div>
+              <strong>Date:</strong> ${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}
+            </div>
+            <div style="grid-column: span 2;">
+              <strong>From:</strong> ${posting.from || 'N/A'}
+            </div>
+            <div style="grid-column: span 2;">
+              <strong>To:</strong> ${posting.to || 'N/A'}
+            </div>
+            ${posting.remarks ? `
+            <div style="grid-column: span 2;">
+              <strong>Remarks:</strong> ${posting.remarks}
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      // Check for promotion
+      const promotions = detectPromotions();
+      const isPromotion = promotions.find(p => p.posting.id === postingId);
+      if (isPromotion) {
+        html += `
+          <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #155724;">🎉 This posting represents a promotion!</strong><br>
+            ${isPromotion.fromRank} → ${isPromotion.toRank}
+          </div>
+        `;
       }
       
-      const [field, order] = sortBy.split('_');
-      results.sort((a, b) => {
-        let aVal = a[field] || '';
-        let bVal = b[field] || '';
-        
-        if (order === 'asc') {
-          return aVal.localeCompare(bVal);
-        } else {
-          return bVal.localeCompare(aVal);
+      // Find related postings
+      const relatedByPerson = allPostings.filter(p => 
+        p.id !== postingId && p.normalizedName === posting.normalizedName
+      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      // Find postings on same date
+      const sameDate = allPostings.filter(p => 
+        p.id !== postingId && p.dateFrom === posting.dateFrom
+      ).sort((a, b) => a.name.localeCompare(b.name));
+      
+      const relatedByPosition = allPostings.filter(p => 
+        p.id !== postingId && (
+          (posting.from && (p.from === posting.from || p.to === posting.from)) ||
+          (posting.to && (p.from === posting.to || p.to === posting.to))
+        )
+      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (sameDate.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Other Postings on ${posting.dateFrom}</h3>
+        `;
+        sameDate.slice(0, 10).forEach(related => {
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.name} (${related.rank || 'N/A'})
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
+                ${related.noticeId} (${related.noticeType})
+              </div>
+            </div>
+          `;
+        });
+        if (sameDate.length > 10) {
+          html += `<p style="text-align: center; color: #666; margin-top: 10px;">...and ${sameDate.length - 10} more</p>`;
         }
-      });
-      
-      renderResults(results);
-      const status = document.getElementById('searchStatus');
-      showStatus(status, 'success', `Found ${results.length} results with advanced filters`);
-    }
-
-    // Render search results
-    function renderResults(data) {
-      const container = document.getElementById('results');
-      
-      if (data.length === 0) {
-        container.innerHTML = '<p class="no-results">No results found. Try adjusting your search criteria.</p>';
-        return;
+        html += '</div>';
       }
-
-      let html = `<p style="margin-bottom: 10px;">Showing ${data.length} result(s)</p>`;
-      html += `<table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Rank</th>
-            <th>From</th>
-            <th>To</th>
-            <th>Date From</th>
-            <th>Date To</th>
-            <th>Notice</th>
-            <th>Remarks</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>`;
-
-      data.forEach(d => {
-        html += `<tr onclick="viewPostingDetails('${d.id}')" style="cursor: pointer;">
-          <td><span class="clickable-name">${d.name}</span></td>
-          <td>${d.rank || '—'}</td>
-          <td>${d.from || '—'}</td>
-          <td>${d.to || '—'}</td>
-          <td>${d.dateFrom || '—'}</td>
-          <td>${d.dateTo || 'Present'}</td>
-          <td>${d.noticeId}<br><small style="color: #666;">${d.noticeType}</small></td>
-          <td>${d.remarks || '—'}</td>
-          <td onclick="event.stopPropagation()">
-            <button class="btn-danger" onclick="deletePosting('${d.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
-          </td>
-        </tr>`;
-      });
-
-      html += '</tbody></table>';
-      container.innerHTML = html;
+      
+      if (relatedByPerson.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Other Postings for ${posting.name}</h3>
+        `;
+        relatedByPerson.forEach(related => {
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'}
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'} • 
+                ${related.noticeId} (${related.noticeType})
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      if (relatedByPosition.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Related Position Movements</h3>
+        `;
+        relatedByPosition.slice(0, 10).forEach(related => {
+          const isRelatedToFrom = posting.from && (related.from === posting.from || related.to === posting.from);
+          const isRelatedToTo = posting.to && (related.from === posting.to || related.to === posting.to);
+          
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.name} (${related.rank || 'N/A'})
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
+                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'}
+              </div>
+              <div style="font-size: 12px; color: #999; margin-top: 3px;">
+                ${isRelatedToFrom ? `Related to: ${posting.from}` : ''}
+                ${isRelatedToTo ? `Related to: ${posting.to}` : ''}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
     }
 
     // Upload to Firestore with duplicate check
@@ -2074,6 +2374,9 @@
         const duplicates = [];
 
         data.forEach(entry => {
+          // Add normalized name
+          entry.normalizedName = normalizeName(entry.name);
+          
           if (entry.noticeId && existingNoticeIds.has(entry.noticeId)) {
             duplicates.push(entry.noticeId);
           } else {
@@ -2142,18 +2445,29 @@
 
     // Export results
     function exportResults() {
-      const results = document.querySelectorAll('#results tbody tr');
-      if (results.length === 0) {
+      const container = document.getElementById('results');
+      const dateGroups = container.querySelectorAll('.date-group');
+      
+      if (dateGroups.length === 0) {
         alert('No data to export. Please perform a search first.');
         return;
       }
 
-      let csv = 'Name,Rank,From,To,Date From,Date To,Notice ID,Notice Type,Remarks\n';
+      let csv = 'Date From,Name,Normalized Name,Rank,From,To,Date To,Notice ID,Notice Type,Remarks\n';
       
-      results.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const noticeText = cells[6].textContent.split('\n');
-        csv += `"${cells[0].textContent}","${cells[1].textContent}","${cells[2].textContent}","${cells[3].textContent}","${cells[4].textContent}","${cells[5].textContent}","${noticeText[0]}","${noticeText[1]}","${cells[7].textContent}"\n`;
+      dateGroups.forEach(group => {
+        const date = group.querySelector('.date-header h3').textContent;
+        const rows = group.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          const nameCell = cells[0].textContent.split('\n');
+          const name = nameCell[0].trim();
+          const normalizedName = nameCell[1] ? nameCell[1].replace(/[()]/g, '').trim() : name;
+          const noticeText = cells[5].textContent.split('\n');
+          
+          csv += `"${date}","${name}","${normalizedName}","${cells[1].textContent}","${cells[2].textContent}","${cells[3].textContent}","${cells[4].textContent}","${noticeText[0]}","${noticeText[1]}","${cells[6].textContent}"\n`;
+        });
       });
 
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -2206,6 +2520,9 @@
       document.getElementById('searchNoticeType').value = '';
       document.getElementById('results').innerHTML = '';
       document.getElementById('searchStatus').className = 'status';
+      // Reset engineer filter
+      engineerFilterActive = false;
+      document.getElementById('engineerToggle').classList.remove('active');
     }
 
     function resetAdvancedFilters() {
