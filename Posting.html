@@ -305,6 +305,14 @@
       background: #c0392b;
     }
 
+    .btn-purple {
+      background: #9b59b6;
+    }
+
+    .btn-purple:hover {
+      background: #8e44ad;
+    }
+
     .card {
       background: white;
       border-radius: 12px;
@@ -342,6 +350,18 @@
       transform: translateY(-2px);
     }
 
+    .stat-card.purple {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    }
+
+    .stat-card.green {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    }
+
+    .stat-card.orange {
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    }
+
     .stat-card h3 {
       font-size: 2rem;
       margin-bottom: 5px;
@@ -350,6 +370,207 @@
     .stat-card p {
       opacity: 0.9;
       font-size: 0.9rem;
+    }
+
+    /* Analysis Charts */
+    .chart-container {
+      margin-top: 20px;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .chart-label {
+      width: 150px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .chart-value {
+      margin-left: auto;
+      font-size: 14px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-right: 10px;
+    }
+
+    .bar-wrapper {
+      flex: 1;
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 0 15px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      border-radius: 15px;
+      transition: width 0.6s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Promotion Analysis */
+    .promotion-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid #27ae60;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .promotion-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .promotion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .promotion-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .promotion-badge {
+      background: #27ae60;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .promotion-details {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Engineers Section */
+    .engineers-section {
+      background: white;
+      border-radius: 12px;
+      margin-top: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .engineers-header {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      color: white;
+      padding: 20px 25px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .engineers-header:hover {
+      background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+    }
+
+    .engineers-header h2 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-icon {
+      font-size: 24px;
+      transition: transform 0.3s;
+    }
+
+    .toggle-icon.open {
+      transform: rotate(180deg);
+    }
+
+    .engineers-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .engineers-content.open {
+      max-height: 2000px;
+    }
+
+    .engineers-inner {
+      padding: 25px;
+    }
+
+    .engineer-filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .engineer-rank-tab {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .engineer-rank-tab.active {
+      background: #9b59b6;
+      color: white;
+    }
+
+    .engineers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+    }
+
+    .engineer-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #9b59b6;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .engineer-card:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .engineer-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .engineer-details {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
     }
 
     table {
@@ -657,6 +878,10 @@
         position: relative;
         top: 0;
       }
+      
+      .engineers-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -709,6 +934,7 @@
           <button class="tab-button" onclick="switchTab('person')">Person History</button>
           <button class="tab-button" onclick="switchTab('position')">Position History</button>
           <button class="tab-button" onclick="switchTab('advanced')">Advanced Filters</button>
+          <button class="tab-button" onclick="switchTab('analysis')">Data Analysis</button>
         </div>
 
         <!-- General Search Tab -->
@@ -826,6 +1052,16 @@
             <button class="btn-secondary" onclick="resetAdvancedFilters()">↻ Reset Advanced</button>
           </div>
         </div>
+
+        <!-- Data Analysis Tab -->
+        <div id="analysisTab" class="tab-content">
+          <div class="button-group">
+            <button onclick="analyzeData()">📊 Analyze Data</button>
+            <button class="btn-purple" onclick="analyzePromotions()">⬆️ Promotion Analysis</button>
+            <button class="btn-success" onclick="analyzeTrends()">📈 Trend Analysis</button>
+          </div>
+          <div id="analysisResults"></div>
+        </div>
       </div>
 
       <!-- Statistics Dashboard -->
@@ -846,13 +1082,13 @@
           <h3 id="unitCount">0</h3>
           <p>Different Units</p>
         </div>
-        <div class="stat-card">
-          <h3 id="activeCount">0</h3>
-          <p>Active Postings</p>
+        <div class="stat-card purple">
+          <h3 id="engineerCount">0</h3>
+          <p>Engineers</p>
         </div>
-        <div class="stat-card">
-          <h3 id="monthCount">0</h3>
-          <p>This Month</p>
+        <div class="stat-card green">
+          <h3 id="promotionCount">0</h3>
+          <p>Promotions</p>
         </div>
       </div>
 
@@ -887,6 +1123,21 @@
         </div>
         <div id="uploadStatus" class="status"></div>
       </div>
+
+      <!-- Engineers Section -->
+      <div class="engineers-section">
+        <div class="engineers-header" onclick="toggleEngineersSection()">
+          <h2>👷 Engineering Personnel Directory</h2>
+          <span class="toggle-icon" id="engineersToggle">▼</span>
+        </div>
+        <div class="engineers-content" id="engineersContent">
+          <div class="engineers-inner">
+            <div class="engineer-filters" id="engineerFilters"></div>
+            <div id="engineersStats"></div>
+            <div id="engineersList"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -904,13 +1155,13 @@
   <script>
     // Firebase configuration
     const firebaseConfig = {
-  apiKey: "AIzaSyDc0NVogv24jSepYYKS1Dbw3Y32IlRBJ_A",
-  authDomain: "posting-notice.firebaseapp.com",
-  projectId: "posting-notice",
-  storageBucket: "posting-notice.firebasestorage.app",
-  messagingSenderId: "245130394809",
-  appId: "1:245130394809:web:c428677d6cc884ef0eaf68",
-  measurementId: "G-TY0K1VQPX5"
+      apiKey: "AIzaSyDc0NVogv24jSepYYKS1Dbw3Y32IlRBJ_A",
+      authDomain: "posting-notice.firebaseapp.com",
+      projectId: "posting-notice",
+      storageBucket: "posting-notice.firebasestorage.app",
+      messagingSenderId: "245130394809",
+      appId: "1:245130394809:web:c428677d6cc884ef0eaf68",
+      measurementId: "G-TY0K1VQPX5"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -923,6 +1174,7 @@
     let allRanks = new Set();
     let allUnits = new Set();
     let currentUser = null;
+    let engineerRanks = ['Engineer', 'Senior Engineer', 'Chief Engineer', 'Principal Engineer', 'Engineering Manager', 'Assistant Engineer'];
 
     // Auth state listener
     auth.onAuthStateChanged((user) => {
@@ -968,6 +1220,7 @@
       await loadAllData();
       updateStatistics();
       populateFilters();
+      loadEngineersSection();
     }
 
     // Load all data from Firestore
@@ -1000,13 +1253,69 @@
       document.getElementById('rankCount').textContent = allRanks.size;
       document.getElementById('unitCount').textContent = allUnits.size;
       
-      const today = new Date().toISOString().split('T')[0];
-      const activePostings = allPostings.filter(p => !p.dateTo || p.dateTo >= today);
-      document.getElementById('activeCount').textContent = activePostings.length;
+      // Count engineers
+      const engineers = allPostings.filter(p => 
+        p.rank && engineerRanks.some(rank => p.rank.toLowerCase().includes(rank.toLowerCase()))
+      );
+      const uniqueEngineers = new Set(engineers.map(e => e.name));
+      document.getElementById('engineerCount').textContent = uniqueEngineers.size;
       
-      const thisMonth = new Date().toISOString().slice(0, 7);
-      const monthPostings = allPostings.filter(p => p.dateFrom && p.dateFrom.startsWith(thisMonth));
-      document.getElementById('monthCount').textContent = monthPostings.length;
+      // Count promotions
+      const promotions = detectPromotions();
+      document.getElementById('promotionCount').textContent = promotions.length;
+    }
+
+    // Detect promotions
+    function detectPromotions() {
+      const promotions = [];
+      const peoplePostings = {};
+      
+      // Group postings by person
+      allPostings.forEach(posting => {
+        if (!peoplePostings[posting.name]) {
+          peoplePostings[posting.name] = [];
+        }
+        peoplePostings[posting.name].push(posting);
+      });
+      
+      // Check for promotions
+      Object.entries(peoplePostings).forEach(([name, postings]) => {
+        postings.sort((a, b) => (a.dateFrom || '').localeCompare(b.dateFrom || ''));
+        
+        for (let i = 1; i < postings.length; i++) {
+          const prevRank = postings[i-1].rank;
+          const currRank = postings[i].rank;
+          
+          if (prevRank && currRank && isPromotion(prevRank, currRank)) {
+            promotions.push({
+              name: name,
+              fromRank: prevRank,
+              toRank: currRank,
+              date: postings[i].dateFrom,
+              posting: postings[i]
+            });
+          }
+        }
+      });
+      
+      return promotions;
+    }
+
+    // Check if rank change is a promotion
+    function isPromotion(fromRank, toRank) {
+      const rankHierarchy = [
+        'Assistant', 'Junior', '', 'Senior', 'Chief', 'Principal', 'Manager', 'Director'
+      ];
+      
+      let fromLevel = -1;
+      let toLevel = -1;
+      
+      rankHierarchy.forEach((level, index) => {
+        if (fromRank.toLowerCase().includes(level.toLowerCase())) fromLevel = index;
+        if (toRank.toLowerCase().includes(level.toLowerCase())) toLevel = index;
+      });
+      
+      return toLevel > fromLevel;
     }
 
     // Populate filter dropdowns
@@ -1029,6 +1338,288 @@
         content.classList.remove('active');
       });
       document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+
+    // Analyze data
+    function analyzeData() {
+      const container = document.getElementById('analysisResults');
+      
+      // Rank distribution
+      const rankCounts = {};
+      allPostings.forEach(p => {
+        if (p.rank) {
+          rankCounts[p.rank] = (rankCounts[p.rank] || 0) + 1;
+        }
+      });
+      
+      // Sort by count
+      const sortedRanks = Object.entries(rankCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+      
+      // Unit distribution
+      const unitCounts = {};
+      allPostings.forEach(p => {
+        if (p.to) {
+          unitCounts[p.to] = (unitCounts[p.to] || 0) + 1;
+        }
+      });
+      
+      const sortedUnits = Object.entries(unitCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+      
+      let html = '<div style="margin-top: 20px;">';
+      
+      // Rank distribution chart
+      html += '<h3 style="margin-bottom: 15px;">Top 10 Ranks by Posting Count</h3>';
+      html += '<div class="chart-container">';
+      const maxRankCount = Math.max(...sortedRanks.map(r => r[1]));
+      sortedRanks.forEach(([rank, count]) => {
+        const percentage = (count / maxRankCount) * 100;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label">${rank}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      // Unit distribution chart
+      html += '<h3 style="margin: 30px 0 15px;">Top 10 Destination Units</h3>';
+      html += '<div class="chart-container">';
+      const maxUnitCount = Math.max(...sortedUnits.map(u => u[1]));
+      sortedUnits.forEach(([unit, count]) => {
+        const percentage = (count / maxUnitCount) * 100;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label" style="width: 200px;">${unit.substring(0, 30)}${unit.length > 30 ? '...' : ''}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #27ae60, #229954);">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Analyze promotions
+    function analyzePromotions() {
+      const container = document.getElementById('analysisResults');
+      const promotions = detectPromotions();
+      
+      promotions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
+      let html = '<div style="margin-top: 20px;">';
+      html += `<h3 style="margin-bottom: 15px;">Detected Promotions (${promotions.length})</h3>`;
+      
+      if (promotions.length === 0) {
+        html += '<p style="color: #666;">No promotions detected in the current data.</p>';
+      } else {
+        promotions.slice(0, 20).forEach(promo => {
+          html += `
+            <div class="promotion-item" onclick="viewPostingDetails('${promo.posting.id}')">
+              <div class="promotion-header">
+                <span class="promotion-name">${promo.name}</span>
+                <span class="promotion-badge">PROMOTED</span>
+              </div>
+              <div class="promotion-details">
+                ${promo.fromRank} → ${promo.toRank} • ${promo.date || 'N/A'}
+              </div>
+            </div>
+          `;
+        });
+        
+        if (promotions.length > 20) {
+          html += `<p style="text-align: center; margin-top: 20px; color: #666;">Showing top 20 of ${promotions.length} promotions</p>`;
+        }
+      }
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Analyze trends
+    function analyzeTrends() {
+      const container = document.getElementById('analysisResults');
+      
+      // Group by year
+      const yearCounts = {};
+      allPostings.forEach(p => {
+        if (p.dateFrom) {
+          const year = p.dateFrom.substring(0, 4);
+          yearCounts[year] = (yearCounts[year] || 0) + 1;
+        }
+      });
+      
+      const sortedYears = Object.entries(yearCounts)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+      
+      // Monthly trends for current year
+      const currentYear = new Date().getFullYear().toString();
+      const monthCounts = {};
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      allPostings.forEach(p => {
+        if (p.dateFrom && p.dateFrom.startsWith(currentYear)) {
+          const month = parseInt(p.dateFrom.substring(5, 7)) - 1;
+          monthCounts[month] = (monthCounts[month] || 0) + 1;
+        }
+      });
+      
+      let html = '<div style="margin-top: 20px;">';
+      
+      // Yearly trends
+      html += '<h3 style="margin-bottom: 15px;">Postings by Year</h3>';
+      html += '<div class="chart-container">';
+      const maxYearCount = Math.max(...sortedYears.map(y => y[1]));
+      sortedYears.forEach(([year, count]) => {
+        const percentage = (count / maxYearCount) * 100;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label">${year}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #f39c12, #e67e22);">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      // Monthly trends
+      html += `<h3 style="margin: 30px 0 15px;">Monthly Trends - ${currentYear}</h3>`;
+      html += '<div class="chart-container">';
+      const maxMonthCount = Math.max(...Object.values(monthCounts));
+      monthNames.forEach((month, index) => {
+        const count = monthCounts[index] || 0;
+        const percentage = maxMonthCount > 0 ? (count / maxMonthCount) * 100 : 0;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label" style="width: 60px;">${month}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #9b59b6, #8e44ad);">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Toggle engineers section
+    function toggleEngineersSection() {
+      const content = document.getElementById('engineersContent');
+      const toggle = document.getElementById('engineersToggle');
+      
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        toggle.classList.remove('open');
+      } else {
+        content.classList.add('open');
+        toggle.classList.add('open');
+        loadEngineersSection();
+      }
+    }
+
+    // Load engineers section
+    function loadEngineersSection() {
+      const engineers = allPostings.filter(p => 
+        p.rank && engineerRanks.some(rank => p.rank.toLowerCase().includes(rank.toLowerCase()))
+      );
+      
+      // Group by rank
+      const engineersByRank = {};
+      engineers.forEach(eng => {
+        if (!engineersByRank[eng.rank]) {
+          engineersByRank[eng.rank] = [];
+        }
+        engineersByRank[eng.rank].push(eng);
+      });
+      
+      // Create filters
+      const filtersDiv = document.getElementById('engineerFilters');
+      filtersDiv.innerHTML = '<button class="engineer-rank-tab active" onclick="filterEngineers(\'all\')">All Engineers</button>';
+      
+      Object.keys(engineersByRank).sort().forEach(rank => {
+        filtersDiv.innerHTML += `<button class="engineer-rank-tab" onclick="filterEngineers('${rank}')">${rank} (${engineersByRank[rank].length})</button>`;
+      });
+      
+      // Stats
+      const statsDiv = document.getElementById('engineersStats');
+      const uniqueEngineers = new Set(engineers.map(e => e.name));
+      statsDiv.innerHTML = `
+        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <strong>Total Engineering Postings:</strong> ${engineers.length} | 
+          <strong>Unique Engineers:</strong> ${uniqueEngineers.size} | 
+          <strong>Different Engineering Ranks:</strong> ${Object.keys(engineersByRank).length}
+        </div>
+      `;
+      
+      // Display all engineers initially
+      displayEngineers(engineers);
+    }
+
+    // Filter engineers
+    function filterEngineers(rank) {
+      // Update active tab
+      document.querySelectorAll('.engineer-rank-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Filter data
+      let filteredEngineers;
+      if (rank === 'all') {
+        filteredEngineers = allPostings.filter(p => 
+          p.rank && engineerRanks.some(r => p.rank.toLowerCase().includes(r.toLowerCase()))
+        );
+      } else {
+        filteredEngineers = allPostings.filter(p => p.rank === rank);
+      }
+      
+      displayEngineers(filteredEngineers);
+    }
+
+    // Display engineers
+    function displayEngineers(engineers) {
+      const container = document.getElementById('engineersList');
+      
+      // Sort by date
+      engineers.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      let html = '<div class="engineers-grid">';
+      engineers.forEach(eng => {
+        html += `
+          <div class="engineer-card" onclick="viewPostingDetails('${eng.id}')">
+            <div class="engineer-name">${eng.name}</div>
+            <div class="engineer-details">
+              <strong>${eng.rank}</strong><br>
+              ${eng.from || 'N/A'} → ${eng.to || 'N/A'}<br>
+              ${eng.dateFrom || 'N/A'} - ${eng.dateTo || 'Present'}<br>
+              <small style="color: #999;">${eng.noticeId} (${eng.noticeType})</small>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      container.innerHTML = html;
     }
 
     // View posting details
@@ -1072,6 +1663,18 @@
           </div>
         </div>
       `;
+      
+      // Check for promotion
+      const promotions = detectPromotions();
+      const isPromotion = promotions.find(p => p.posting.id === postingId);
+      if (isPromotion) {
+        html += `
+          <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #155724;">🎉 This posting represents a promotion!</strong><br>
+            ${isPromotion.fromRank} → ${isPromotion.toRank}
+          </div>
+        `;
+      }
       
       // Find related postings
       const relatedByPerson = allPostings.filter(p => 
@@ -1195,18 +1798,38 @@
       
       modalTitle.textContent = `Posting History: ${personName}`;
       
-      let html = '<div class="timeline">';
+      // Check for promotions
+      const promotions = detectPromotions();
+      const personPromotions = promotions.filter(p => p.name === personName);
+      
+      let html = '';
+      
+      if (personPromotions.length > 0) {
+        html += `
+          <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #155724;">🎉 ${personPromotions.length} promotion(s) detected!</strong>
+          </div>
+        `;
+      }
+      
+      html += '<div class="timeline">';
       personPostings.forEach((posting, index) => {
+        const isPromotion = personPromotions.find(p => p.posting.id === posting.id);
+        
         html += `
           <div class="timeline-item">
-            <div class="timeline-marker">${index + 1}</div>
-            <div class="timeline-content" style="cursor: pointer;" onclick="viewPostingDetails('${posting.id}')">
+            <div class="timeline-marker" style="background: ${isPromotion ? '#27ae60' : '#3498db'}">
+              ${isPromotion ? '⬆' : index + 1}
+            </div>
+            <div class="timeline-content" style="cursor: pointer; border-left-color: ${isPromotion ? '#27ae60' : '#3498db'}" 
+                 onclick="viewPostingDetails('${posting.id}')">
               <div class="timeline-date">${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}</div>
               <div class="timeline-title">${posting.from || 'N/A'} → ${posting.to || 'N/A'}</div>
               <div class="timeline-details">
                 <strong>Rank:</strong> ${posting.rank || 'N/A'}<br>
                 <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
                 ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}` : ''}
+                ${isPromotion ? `<br><strong style="color: #27ae60;">Promoted from ${isPromotion.fromRank}</strong>` : ''}
               </div>
             </div>
           </div>
@@ -1488,6 +2111,7 @@
         await loadAllData();
         updateStatistics();
         populateFilters();
+        loadEngineersSection();
 
       } catch (err) {
         showStatus(status, 'error', `❌ Error: ${err.message}`);
