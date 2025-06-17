@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Posting Notice Manager</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    /* Login Styles */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    }
+
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      margin: 20px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+      color: #2c3e50;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .login-header p {
+      color: #666;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input {
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .login-button {
+      padding: 12px;
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .login-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+
+    .login-error {
+      color: #e74c3c;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Main App Styles */
+    .app-container {
+      display: none;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      padding: 20px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left h1 {
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+    }
+
+    .header-left p {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-info {
+      text-align: right;
+    }
+
+    .user-info .user-email {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .logout-button {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .logout-button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .search-section {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+    }
+
+    .search-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-button.active {
+      color: #3498db;
+      border-bottom-color: #3498db;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    input[type="text"], input[type="date"], select {
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+      width: 100%;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #2980b9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-secondary {
+      background: #95a5a6;
+    }
+
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .btn-success {
+      background: #27ae60;
+    }
+
+    .btn-success:hover {
+      background: #229954;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-card h3 {
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background: #34495e;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    tr {
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .clickable-name {
+      color: #3498db;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .clickable-name:hover {
+      color: #2980b9;
+    }
+
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -30px;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-marker {
+      width: 40px;
+      height: 40px;
+      background: #3498db;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-content {
+      flex: 1;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+    }
+
+    .timeline-date {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .timeline-details {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .related-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .related-section h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+
+    .related-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+
+    .related-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+      border-left-color: #3498db;
+    }
+
+    .person-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .person-card:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .person-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .person-info {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal-content {
+      background: white;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 12px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: -30px;
+      background: white;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modal-close {
+      font-size: 28px;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      resize: vertical;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      .header-right {
+        flex-direction: column;
+      }
+      
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .search-section {
+        position: relative;
+        top: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Container -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>📋 Posting Manager</h1>
+        <p>Please login to continue</p>
+      </div>
+      <form class="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="login-button">Login</button>
+        <div id="loginError" class="login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App Container -->
+  <div id="appContainer" class="app-container">
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <h1>📋 Advanced Posting Notice Manager</h1>
+          <p>Track personnel movements and position histories</p>
+        </div>
+        <div class="header-right">
+          <div class="user-info">
+            <div class="user-email" id="userEmail"></div>
+          </div>
+          <button class="logout-button" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Advanced Search Section -->
+      <div class="search-section">
+        <div class="search-tabs">
+          <button class="tab-button active" onclick="switchTab('general')">General Search</button>
+          <button class="tab-button" onclick="switchTab('person')">Person History</button>
+          <button class="tab-button" onclick="switchTab('position')">Position History</button>
+          <button class="tab-button" onclick="switchTab('advanced')">Advanced Filters</button>
+        </div>
+
+        <!-- General Search Tab -->
+        <div id="generalTab" class="tab-content active">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Name</label>
+              <input type="text" id="searchName" placeholder="Enter name...">
+            </div>
+            <div class="filter-group">
+              <label>Rank</label>
+              <select id="searchRank">
+                <option value="">All Ranks</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Notice ID</label>
+              <input type="text" id="searchNoticeId" placeholder="Enter notice ID...">
+            </div>
+            <div class="filter-group">
+              <label>Notice Type</label>
+              <select id="searchNoticeType">
+                <option value="">All Types</option>
+                <option value="AA&PN">AA&PN</option>
+                <option value="U-PN">U-PN</option>
+                <option value="CEDD-PN">CEDD-PN</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="searchPostings()">🔍 Search</button>
+            <button class="btn-secondary" onclick="resetFilters()">↻ Reset</button>
+            <button class="btn-success" onclick="exportResults()">📥 Export</button>
+          </div>
+        </div>
+
+        <!-- Person History Tab -->
+        <div id="personTab" class="tab-content">
+          <div class="filter-grid">
+            <div class="filter-group" style="grid-column: span 2;">
+              <label>Select Person</label>
+              <input type="text" id="personSearch" placeholder="Type to search person..." onkeyup="searchPerson()">
+            </div>
+          </div>
+          <div id="personSuggestions"></div>
+          <div class="button-group">
+            <button onclick="viewPersonHistory()">📊 View History</button>
+          </div>
+        </div>
+
+        <!-- Position History Tab -->
+        <div id="positionTab" class="tab-content">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Unit/Position</label>
+              <input type="text" id="positionSearch" placeholder="Enter unit or position...">
+            </div>
+            <div class="filter-group">
+              <label>Search In</label>
+              <select id="positionField">
+                <option value="from">From Field</option>
+                <option value="to">To Field</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="viewPositionHistory()">📊 View Position History</button>
+          </div>
+        </div>
+
+        <!-- Advanced Filters Tab -->
+        <div id="advancedTab" class="tab-content">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Date From (Start)</label>
+              <input type="date" id="dateFromStart">
+            </div>
+            <div class="filter-group">
+              <label>Date From (End)</label>
+              <input type="date" id="dateFromEnd">
+            </div>
+            <div class="filter-group">
+              <label>Date To (Start)</label>
+              <input type="date" id="dateToStart">
+            </div>
+            <div class="filter-group">
+              <label>Date To (End)</label>
+              <input type="date" id="dateToEnd">
+            </div>
+            <div class="filter-group">
+              <label>From Unit</label>
+              <input type="text" id="fromUnit" placeholder="From unit...">
+            </div>
+            <div class="filter-group">
+              <label>To Unit</label>
+              <input type="text" id="toUnit" placeholder="To unit...">
+            </div>
+            <div class="filter-group">
+              <label>Remarks Contains</label>
+              <input type="text" id="remarksContains" placeholder="Remarks...">
+            </div>
+            <div class="filter-group">
+              <label>Sort By</label>
+              <select id="sortBy">
+                <option value="dateFrom_desc">Date From (Newest)</option>
+                <option value="dateFrom_asc">Date From (Oldest)</option>
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Name (Z-A)</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="advancedSearch()">🔍 Advanced Search</button>
+            <button class="btn-secondary" onclick="resetAdvancedFilters()">↻ Reset Advanced</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Dashboard -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <h3 id="totalCount">0</h3>
+          <p>Total Postings</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="peopleCount">0</h3>
+          <p>Total Personnel</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="rankCount">0</h3>
+          <p>Different Ranks</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="unitCount">0</h3>
+          <p>Different Units</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="activeCount">0</h3>
+          <p>Active Postings</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="monthCount">0</h3>
+          <p>This Month</p>
+        </div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="card">
+        <h2>📊 Search Results</h2>
+        <div id="searchStatus" class="status"></div>
+        <div id="results"></div>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="card">
+        <h2>📤 Upload JSON Data</h2>
+        <p style="color: #666; margin-bottom: 15px;">Upload posting data in JSON format. Duplicate entries (by noticeId) will be automatically detected and prevented.</p>
+        <textarea id="jsonInput" placeholder='[
+  {
+    "name": "John Doe",
+    "rank": "Captain",
+    "from": "Unit A",
+    "to": "Unit B",
+    "dateFrom": "2024-01-01",
+    "dateTo": "2024-12-31",
+    "noticeId": "PN-2024-001",
+    "noticeType": "AA&PN",
+    "remarks": "Transfer"
+  }
+]'></textarea>
+        <div class="button-group">
+          <button onclick="uploadToFirestore()">📤 Upload to Firebase</button>
+          <button class="btn-secondary" onclick="clearInput()">🗑️ Clear</button>
+          <button class="btn-secondary" onclick="downloadTemplate()">📄 Download Template</button>
+        </div>
+        <div id="uploadStatus" class="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Details</h2>
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+  apiKey: "AIzaSyDc0NVogv24jSepYYKS1Dbw3Y32IlRBJ_A",
+  authDomain: "posting-notice.firebaseapp.com",
+  projectId: "posting-notice",
+  storageBucket: "posting-notice.firebasestorage.app",
+  messagingSenderId: "245130394809",
+  appId: "1:245130394809:web:c428677d6cc884ef0eaf68",
+  measurementId: "G-TY0K1VQPX5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Global data storage
+    let allPostings = [];
+    let allPeople = new Set();
+    let allRanks = new Set();
+    let allUnits = new Set();
+    let currentUser = null;
+
+    // Auth state listener
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('userEmail').textContent = user.email;
+        initializeApp();
+      } else {
+        currentUser = null;
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
+      }
+    });
+
+    // Handle login
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('loginError');
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        errorDiv.textContent = '';
+      } catch (error) {
+        errorDiv.textContent = error.message;
+      }
+    }
+
+    // Handle logout
+    async function handleLogout() {
+      try {
+        await auth.signOut();
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    // Initialize app after login
+    async function initializeApp() {
+      await loadAllData();
+      updateStatistics();
+      populateFilters();
+    }
+
+    // Load all data from Firestore
+    async function loadAllData() {
+      try {
+        const snapshot = await db.collection("postings").get();
+        allPostings = [];
+        allPeople.clear();
+        allRanks.clear();
+        allUnits.clear();
+        
+        snapshot.forEach(doc => {
+          const data = { id: doc.id, ...doc.data() };
+          allPostings.push(data);
+          
+          if (data.name) allPeople.add(data.name);
+          if (data.rank) allRanks.add(data.rank);
+          if (data.from) allUnits.add(data.from);
+          if (data.to) allUnits.add(data.to);
+        });
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    }
+
+    // Update statistics
+    function updateStatistics() {
+      document.getElementById('totalCount').textContent = allPostings.length;
+      document.getElementById('peopleCount').textContent = allPeople.size;
+      document.getElementById('rankCount').textContent = allRanks.size;
+      document.getElementById('unitCount').textContent = allUnits.size;
+      
+      const today = new Date().toISOString().split('T')[0];
+      const activePostings = allPostings.filter(p => !p.dateTo || p.dateTo >= today);
+      document.getElementById('activeCount').textContent = activePostings.length;
+      
+      const thisMonth = new Date().toISOString().slice(0, 7);
+      const monthPostings = allPostings.filter(p => p.dateFrom && p.dateFrom.startsWith(thisMonth));
+      document.getElementById('monthCount').textContent = monthPostings.length;
+    }
+
+    // Populate filter dropdowns
+    function populateFilters() {
+      const rankSelect = document.getElementById('searchRank');
+      rankSelect.innerHTML = '<option value="">All Ranks</option>';
+      Array.from(allRanks).sort().forEach(rank => {
+        rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`;
+      });
+    }
+
+    // Switch tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabName + 'Tab').classList.add('active');
+    }
+
+    // View posting details
+    function viewPostingDetails(postingId) {
+      const posting = allPostings.find(p => p.id === postingId);
+      if (!posting) return;
+      
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      modalTitle.textContent = 'Posting Details';
+      
+      let html = `
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: #2c3e50; margin-bottom: 15px;">${posting.name}</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div>
+              <strong>Rank:</strong> ${posting.rank || 'N/A'}
+            </div>
+            <div>
+              <strong>Notice ID:</strong> ${posting.noticeId}
+            </div>
+            <div>
+              <strong>Notice Type:</strong> ${posting.noticeType}
+            </div>
+            <div>
+              <strong>Date:</strong> ${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}
+            </div>
+            <div style="grid-column: span 2;">
+              <strong>From:</strong> ${posting.from || 'N/A'}
+            </div>
+            <div style="grid-column: span 2;">
+              <strong>To:</strong> ${posting.to || 'N/A'}
+            </div>
+            ${posting.remarks ? `
+            <div style="grid-column: span 2;">
+              <strong>Remarks:</strong> ${posting.remarks}
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      // Find related postings
+      const relatedByPerson = allPostings.filter(p => 
+        p.id !== postingId && p.name === posting.name
+      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      const relatedByPosition = allPostings.filter(p => 
+        p.id !== postingId && (
+          (posting.from && (p.from === posting.from || p.to === posting.from)) ||
+          (posting.to && (p.from === posting.to || p.to === posting.to))
+        )
+      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (relatedByPerson.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Other Postings for ${posting.name}</h3>
+        `;
+        relatedByPerson.forEach(related => {
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'}
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'} • 
+                ${related.noticeId} (${related.noticeType})
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      if (relatedByPosition.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Related Position Movements</h3>
+        `;
+        relatedByPosition.slice(0, 10).forEach(related => {
+          const isRelatedToFrom = posting.from && (related.from === posting.from || related.to === posting.from);
+          const isRelatedToTo = posting.to && (related.from === posting.to || related.to === posting.to);
+          
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.name} (${related.rank || 'N/A'})
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
+                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'}
+              </div>
+              <div style="font-size: 12px; color: #999; margin-top: 3px;">
+                ${isRelatedToFrom ? `Related to: ${posting.from}` : ''}
+                ${isRelatedToTo ? `Related to: ${posting.to}` : ''}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // Search person suggestions
+    function searchPerson() {
+      const searchTerm = document.getElementById('personSearch').value.toLowerCase();
+      const suggestions = document.getElementById('personSuggestions');
+      
+      if (searchTerm.length < 2) {
+        suggestions.innerHTML = '';
+        return;
+      }
+      
+      const matches = Array.from(allPeople)
+        .filter(person => person.toLowerCase().includes(searchTerm))
+        .slice(0, 10);
+      
+      suggestions.innerHTML = matches.map(person => {
+        const personData = allPostings.filter(p => p.name === person);
+        const rank = personData[0]?.rank || 'Unknown';
+        const postingCount = personData.length;
+        
+        return `
+          <div class="person-card" onclick="selectPerson('${person}')">
+            <div class="person-name">${person}</div>
+            <div class="person-info">${rank} • ${postingCount} posting(s)</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Select person
+    function selectPerson(name) {
+      document.getElementById('personSearch').value = name;
+      document.getElementById('personSuggestions').innerHTML = '';
+    }
+
+    // View person history
+    function viewPersonHistory() {
+      const personName = document.getElementById('personSearch').value;
+      if (!personName) {
+        alert('Please select a person');
+        return;
+      }
+      
+      const personPostings = allPostings
+        .filter(p => p.name === personName)
+        .sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (personPostings.length === 0) {
+        alert('No postings found for this person');
+        return;
+      }
+      
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      modalTitle.textContent = `Posting History: ${personName}`;
+      
+      let html = '<div class="timeline">';
+      personPostings.forEach((posting, index) => {
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-marker">${index + 1}</div>
+            <div class="timeline-content" style="cursor: pointer;" onclick="viewPostingDetails('${posting.id}')">
+              <div class="timeline-date">${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}</div>
+              <div class="timeline-title">${posting.from || 'N/A'} → ${posting.to || 'N/A'}</div>
+              <div class="timeline-details">
+                <strong>Rank:</strong> ${posting.rank || 'N/A'}<br>
+                <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
+                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // View position history
+    function viewPositionHistory() {
+      const position = document.getElementById('positionSearch').value;
+      const field = document.getElementById('positionField').value;
+      
+      if (!position) {
+        alert('Please enter a position or unit name');
+        return;
+      }
+      
+      let positionPostings = [];
+      
+      if (field === 'from' || field === 'both') {
+        positionPostings = positionPostings.concat(
+          allPostings.filter(p => p.from && p.from.toLowerCase().includes(position.toLowerCase()))
+        );
+      }
+      
+      if (field === 'to' || field === 'both') {
+        positionPostings = positionPostings.concat(
+          allPostings.filter(p => p.to && p.to.toLowerCase().includes(position.toLowerCase()))
+        );
+      }
+      
+      const uniquePostings = Array.from(new Map(positionPostings.map(p => [p.id, p])).values());
+      uniquePostings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (uniquePostings.length === 0) {
+        alert('No postings found for this position');
+        return;
+      }
+      
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      modalTitle.textContent = `Position History: ${position}`;
+      
+      let html = '<div class="timeline">';
+      uniquePostings.forEach((posting, index) => {
+        const isIncoming = posting.to && posting.to.toLowerCase().includes(position.toLowerCase());
+        const isOutgoing = posting.from && posting.from.toLowerCase().includes(position.toLowerCase());
+        
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-marker" style="background: ${isIncoming ? '#27ae60' : '#e74c3c'}">
+              ${isIncoming ? '→' : '←'}
+            </div>
+            <div class="timeline-content" style="border-left-color: ${isIncoming ? '#27ae60' : '#e74c3c'}; cursor: pointer;" 
+                 onclick="viewPostingDetails('${posting.id}')">
+              <div class="timeline-date">${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}</div>
+              <div class="timeline-title">
+                ${posting.name} (${posting.rank || 'N/A'})
+              </div>
+              <div class="timeline-details">
+                <strong>${isIncoming ? 'Incoming from' : 'Outgoing to'}:</strong> 
+                ${isIncoming ? posting.from || 'N/A' : posting.to || 'N/A'}<br>
+                <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
+                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // Search postings
+    async function searchPostings() {
+      const name = document.getElementById('searchName').value.trim().toLowerCase();
+      const rank = document.getElementById('searchRank').value;
+      const noticeId = document.getElementById('searchNoticeId').value.trim();
+      const noticeType = document.getElementById('searchNoticeType').value;
+
+      const status = document.getElementById('searchStatus');
+      status.innerHTML = '<span class="loader"></span> Searching...';
+      status.className = 'status info';
+
+      try {
+        let results = allPostings;
+        
+        if (name) {
+          results = results.filter(p => p.name && p.name.toLowerCase().includes(name));
+        }
+        if (rank) {
+          results = results.filter(p => p.rank === rank);
+        }
+        if (noticeId) {
+          results = results.filter(p => p.noticeId === noticeId);
+        }
+        if (noticeType) {
+          results = results.filter(p => p.noticeType === noticeType);
+        }
+        
+        renderResults(results);
+        showStatus(status, 'success', `Found ${results.length} results`);
+
+      } catch (error) {
+        showStatus(status, 'error', `❌ Search error: ${error.message}`);
+      }
+    }
+
+    // Advanced search
+    function advancedSearch() {
+      const dateFromStart = document.getElementById('dateFromStart').value;
+      const dateFromEnd = document.getElementById('dateFromEnd').value;
+      const dateToStart = document.getElementById('dateToStart').value;
+      const dateToEnd = document.getElementById('dateToEnd').value;
+      const fromUnit = document.getElementById('fromUnit').value.toLowerCase();
+      const toUnit = document.getElementById('toUnit').value.toLowerCase();
+      const remarksContains = document.getElementById('remarksContains').value.toLowerCase();
+      const sortBy = document.getElementById('sortBy').value;
+      
+      let results = allPostings;
+      
+      if (dateFromStart) {
+        results = results.filter(p => p.dateFrom >= dateFromStart);
+      }
+      if (dateFromEnd) {
+        results = results.filter(p => p.dateFrom <= dateFromEnd);
+      }
+      if (dateToStart) {
+        results = results.filter(p => p.dateTo >= dateToStart);
+      }
+      if (dateToEnd) {
+        results = results.filter(p => p.dateTo <= dateToEnd);
+      }
+      if (fromUnit) {
+        results = results.filter(p => p.from && p.from.toLowerCase().includes(fromUnit));
+      }
+      if (toUnit) {
+        results = results.filter(p => p.to && p.to.toLowerCase().includes(toUnit));
+      }
+      if (remarksContains) {
+        results = results.filter(p => p.remarks && p.remarks.toLowerCase().includes(remarksContains));
+      }
+      
+      const [field, order] = sortBy.split('_');
+      results.sort((a, b) => {
+        let aVal = a[field] || '';
+        let bVal = b[field] || '';
+        
+        if (order === 'asc') {
+          return aVal.localeCompare(bVal);
+        } else {
+          return bVal.localeCompare(aVal);
+        }
+      });
+      
+      renderResults(results);
+      const status = document.getElementById('searchStatus');
+      showStatus(status, 'success', `Found ${results.length} results with advanced filters`);
+    }
+
+    // Render search results
+    function renderResults(data) {
+      const container = document.getElementById('results');
+      
+      if (data.length === 0) {
+        container.innerHTML = '<p class="no-results">No results found. Try adjusting your search criteria.</p>';
+        return;
+      }
+
+      let html = `<p style="margin-bottom: 10px;">Showing ${data.length} result(s)</p>`;
+      html += `<table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Rank</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Date From</th>
+            <th>Date To</th>
+            <th>Notice</th>
+            <th>Remarks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>`;
+
+      data.forEach(d => {
+        html += `<tr onclick="viewPostingDetails('${d.id}')" style="cursor: pointer;">
+          <td><span class="clickable-name">${d.name}</span></td>
+          <td>${d.rank || '—'}</td>
+          <td>${d.from || '—'}</td>
+          <td>${d.to || '—'}</td>
+          <td>${d.dateFrom || '—'}</td>
+          <td>${d.dateTo || 'Present'}</td>
+          <td>${d.noticeId}<br><small style="color: #666;">${d.noticeType}</small></td>
+          <td>${d.remarks || '—'}</td>
+          <td onclick="event.stopPropagation()">
+            <button class="btn-danger" onclick="deletePosting('${d.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
+          </td>
+        </tr>`;
+      });
+
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+
+    // Upload to Firestore with duplicate check
+    async function uploadToFirestore() {
+      if (!currentUser) {
+        alert('Please login first');
+        return;
+      }
+      
+      const input = document.getElementById('jsonInput').value;
+      const status = document.getElementById('uploadStatus');
+      
+      if (!input.trim()) {
+        showStatus(status, 'error', '❌ Please enter JSON data');
+        return;
+      }
+
+      status.innerHTML = '<span class="loader"></span> Uploading...';
+      status.className = 'status info';
+
+      try {
+        const data = JSON.parse(input);
+        if (!Array.isArray(data)) {
+          throw new Error('Data must be a JSON array');
+        }
+
+        const existingNoticeIds = new Set(allPostings.map(p => p.noticeId).filter(id => id));
+
+        const newEntries = [];
+        const duplicates = [];
+
+        data.forEach(entry => {
+          if (entry.noticeId && existingNoticeIds.has(entry.noticeId)) {
+            duplicates.push(entry.noticeId);
+          } else {
+            newEntries.push(entry);
+          }
+        });
+
+        if (newEntries.length === 0) {
+          showStatus(status, 'error', `❌ All ${data.length} entries are duplicates and were not uploaded.`);
+          return;
+        }
+
+        const batch = db.batch();
+        const coll = db.collection('postings');
+
+        newEntries.forEach(entry => {
+          const docRef = coll.doc();
+          batch.set(docRef, {
+            ...entry,
+            uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            uploadedBy: currentUser.email
+          });
+        });
+
+        await batch.commit();
+
+        let message = `✅ Successfully uploaded ${newEntries.length} new entries.`;
+        if (duplicates.length > 0) {
+          message += ` Skipped ${duplicates.length} duplicate entries: ${duplicates.join(', ')}`;
+        }
+        
+        showStatus(status, 'success', message);
+        document.getElementById('jsonInput').value = '';
+        
+        await loadAllData();
+        updateStatistics();
+        populateFilters();
+
+      } catch (err) {
+        showStatus(status, 'error', `❌ Error: ${err.message}`);
+      }
+    }
+
+    // Delete posting
+    async function deletePosting(id) {
+      if (!currentUser) {
+        alert('Please login first');
+        return;
+      }
+      
+      if (!confirm('Are you sure you want to delete this posting?')) return;
+
+      try {
+        await db.collection('postings').doc(id).delete();
+        
+        await loadAllData();
+        updateStatistics();
+        searchPostings();
+        
+        alert('Posting deleted successfully!');
+      } catch (error) {
+        alert('Error deleting posting: ' + error.message);
+      }
+    }
+
+    // Export results
+    function exportResults() {
+      const results = document.querySelectorAll('#results tbody tr');
+      if (results.length === 0) {
+        alert('No data to export. Please perform a search first.');
+        return;
+      }
+
+      let csv = 'Name,Rank,From,To,Date From,Date To,Notice ID,Notice Type,Remarks\n';
+      
+      results.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const noticeText = cells[6].textContent.split('\n');
+        csv += `"${cells[0].textContent}","${cells[1].textContent}","${cells[2].textContent}","${cells[3].textContent}","${cells[4].textContent}","${cells[5].textContent}","${noticeText[0]}","${noticeText[1]}","${cells[7].textContent}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `posting_notices_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // Download JSON template
+    function downloadTemplate() {
+      const template = [{
+        name: "John Doe",
+        rank: "Captain",
+        from: "Unit A",
+        to: "Unit B",
+        dateFrom: "2024-01-01",
+        dateTo: "2024-12-31",
+        noticeId: "PN-2024-001",
+        noticeType: "AA&PN",
+        remarks: "Transfer for operational requirements"
+      }];
+      
+      const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'posting_template.json';
+      a.click();
+    }
+
+    // Utility functions
+    function showStatus(element, type, message) {
+      element.textContent = message;
+      element.className = `status ${type}`;
+      setTimeout(() => {
+        element.className = 'status';
+      }, 5000);
+    }
+
+    function clearInput() {
+      document.getElementById('jsonInput').value = '';
+    }
+
+    function resetFilters() {
+      document.getElementById('searchName').value = '';
+      document.getElementById('searchRank').value = '';
+      document.getElementById('searchNoticeId').value = '';
+      document.getElementById('searchNoticeType').value = '';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('searchStatus').className = 'status';
+    }
+
+    function resetAdvancedFilters() {
+      document.getElementById('dateFromStart').value = '';
+      document.getElementById('dateFromEnd').value = '';
+      document.getElementById('dateToStart').value = '';
+      document.getElementById('dateToEnd').value = '';
+      document.getElementById('fromUnit').value = '';
+      document.getElementById('toUnit').value = '';
+      document.getElementById('remarksContains').value = '';
+      document.getElementById('sortBy').value = 'dateFrom_desc';
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('detailModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
+
+</body>
+</html>
