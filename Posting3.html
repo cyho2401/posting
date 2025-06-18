@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>CEDD Staff & Posting Manager</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+    }
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+    input[type="file"], input[type="text"], textarea {
+      padding: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+      font-family: monospace;
+    }
+    textarea {
+      height: 120px;
+    }
+    .staff-card {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #3498db;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .staff-card h3 {
+      margin: 0 0 5px;
+    }
+    .staff-card p {
+      margin: 2px 0;
+      color: #555;
+    }
+    #staffList {
+      margin-top: 20px;
+    }
+    button {
+      padding: 8px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📋 CEDD Staff & Posting Manager</h1>
+
+  <h2>📤 上傳職員清單（CSV）</h2>
+  <input type="file" id="csvInput" accept=".csv" />
+  <button onclick="uploadCSV()">Upload CSV</button>
+
+  <h2>📤 上傳 Posting Notice（JSON）</h2>
+  <textarea id="jsonInput" placeholder='[
+  {
+    "name": "Ms SIN Yin-man",
+    "rank": "Chief Geotechnical Engineer",
+    "from": "SGE/EG",
+    "to": "CGE/P&D",
+    "dateFrom": "2025-06-30",
+    "dateTo": "2025-07-11",
+    "noticeId": "44/2025",
+    "noticeType": "AA&PN",
+    "remarks": "Acting in addition to own duties"
+  }
+]'></textarea>
+  <button onclick="uploadPosting()">Upload Posting Notice</button>
+
+  <h2>🔍 搜尋職員</h2>
+  <input type="text" id="searchInput" placeholder="輸入姓名、部門或職級關鍵字..." oninput="filterStaff()" />
+
+  <h2>👥 職員清單</h2>
+  <div id="staffList">載入中...</div>
+
+  <script>
+    // ✅ Firebase 設定
+    const firebaseConfig = {
+      apiKey: "AIzaSyDc0NVogv24jSepYYKS1Dbw3Y32IlRBJ_A",
+      authDomain: "posting-notice.firebaseapp.com",
+      projectId: "posting-notice",
+      storageBucket: "posting-notice.firebasestorage.app",
+      messagingSenderId: "245130394809",
+      appId: "1:245130394809:web:c428677d6cc884ef0eaf68",
+      measurementId: "G-TY0K1VQPX5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allStaff = [];
+
+    function normalizeName(name) {
+      return name.replace(/^(Mr|Ms|Miss|Mrs|Dr|Prof)\.?\s+/i, '').trim();
+    }
+
+    async function uploadCSV() {
+      const file = document.getElementById('csvInput').files[0];
+      if (!file) return alert("請選擇 CSV 檔");
+
+      Papa.parse(file, {
+        header: true,
+        complete: async (results) => {
+          const data = results.data;
+          for (let row of data) {
+            const staff = {
+              name: row['Full Name'] || row['name'],
+              normalizedName: normalizeName(row['Full Name'] || row['name']),
+              rank: row['Post Title'] || row['rank'],
+              department: row['Department'],
+              post: row['Office'],
+              tel: row['Office Tel'],
+              uploadedAt: new Date().toISOString()
+            };
+            await db.collection('staff').add(staff);
+          }
+          alert("✅ 職員清單上傳完成！");
+          loadStaff();
+        }
+      });
+    }
+
+    async function uploadPosting() {
+      const input = document.getElementById('jsonInput').value;
+      try {
+        const data = JSON.parse(input);
+        for (let row of data) {
+          row.normalizedName = normalizeName(row.name);
+          await db.collection('postings').add({
+            ...row,
+            uploadedAt: new Date().toISOString()
+          });
+        }
+        alert("✅ Posting Notice 上傳完成！");
+        document.getElementById('jsonInput').value = '';
+      } catch (e) {
+        alert("❌ JSON 格式錯誤：" + e.message);
+      }
+    }
+
+    async function loadStaff() {
+      const snapshot = await db.collection('staff').orderBy('normalizedName').get();
+      allStaff = snapshot.docs.map(doc => doc.data());
+      renderStaff(allStaff);
+    }
+
+    function filterStaff() {
+      const keyword = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = allStaff.filter(staff =>
+        (staff.name || '').toLowerCase().includes(keyword) ||
+        (staff.rank || '').toLowerCase().includes(keyword) ||
+        (staff.department || '').toLowerCase().includes(keyword)
+      );
+      renderStaff(filtered);
+    }
+
+    function renderStaff(staffArray) {
+      const container = document.getElementById('staffList');
+      container.innerHTML = '';
+      if (staffArray.length === 0) {
+        container.innerHTML = '<p>沒有符合條件的職員。</p>';
+        return;
+      }
+      staffArray.forEach(staff => {
+        const card = document.createElement('div');
+        card.className = 'staff-card';
+        card.innerHTML = `
+          <h3>${staff.name}</h3>
+          <p><strong>職級：</strong>${staff.rank || '—'}</p>
+          <p><strong>部門：</strong>${staff.department || '—'}</p>
+          <p><strong>辦公室：</strong>${staff.post || '—'}</p>
+          <p><strong>電話：</strong>${staff.tel || '—'}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 初始載入
+    loadStaff();
+  </script>
+
+</body>
+</html>
