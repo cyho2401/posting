@@ -1,0 +1,3124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Posting Notice Manager</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+    }
+
+    /* Login Styles */
+    .login-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    }
+
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      margin: 20px;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+      color: #2c3e50;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .login-header p {
+      color: #666;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input {
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .login-button {
+      padding: 12px;
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .login-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+    }
+
+    .login-error {
+      color: #e74c3c;
+      font-size: 14px;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    /* Main App Styles */
+    .app-container {
+      display: none;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+      color: white;
+      padding: 20px 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-left h1 {
+      font-size: 2.2rem;
+      margin-bottom: 5px;
+    }
+
+    .header-left p {
+      opacity: 0.9;
+      font-size: 1rem;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-info {
+      text-align: right;
+    }
+
+    .user-info .user-email {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .logout-button {
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .logout-button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .search-section {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 10px;
+      z-index: 100;
+    }
+
+    .search-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e0e0e0;
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .tab-button.active {
+      color: #3498db;
+      border-bottom-color: #3498db;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    input[type="text"], input[type="date"], select {
+      padding: 10px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: all 0.3s;
+      width: 100%;
+    }
+
+    input[type="text"]:focus, input[type="date"]:focus, select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    button:hover {
+      background: #2980b9;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .btn-secondary {
+      background: #95a5a6;
+    }
+
+    .btn-secondary:hover {
+      background: #7f8c8d;
+    }
+
+    .btn-success {
+      background: #27ae60;
+    }
+
+    .btn-success:hover {
+      background: #229954;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-purple {
+      background: #9b59b6;
+    }
+
+    .btn-purple:hover {
+      background: #8e44ad;
+    }
+
+    /* Current Positions Section */
+    .current-positions-section {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .department-grid {
+      display: grid;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .department-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s;
+    }
+
+    .department-card:hover {
+      border-color: #3498db;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .department-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    .department-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
+    }
+
+    .department-count {
+      background: #3498db;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .personnel-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .personnel-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .personnel-item:hover {
+      transform: translateX(5px);
+      border-color: #3498db;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .personnel-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .personnel-rank {
+      font-size: 14px;
+      color: #666;
+      margin-left: 10px;
+    }
+
+    .personnel-date {
+      font-size: 12px;
+      color: #999;
+    }
+
+    /* Acting Badge */
+    .acting-badge {
+      background: #f39c12;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    /* Toggle Switch */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: #e0e0e0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .toggle-switch.active {
+      background: #3498db;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: left 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .toggle-switch.active .toggle-slider {
+      left: 28px;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-card.purple {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    }
+
+    .stat-card.green {
+      background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+    }
+
+    .stat-card.orange {
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    }
+
+    .stat-card h3 {
+      font-size: 2rem;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      opacity: 0.9;
+      font-size: 0.9rem;
+    }
+
+    /* Date Grouping Styles */
+    .date-group {
+      margin-bottom: 30px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .date-header {
+      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .date-header:hover {
+      background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    }
+
+    .date-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .date-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .date-content {
+      padding: 20px;
+    }
+
+    /* Promotion Timeline */
+    .promotion-timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .promotion-item {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .promotion-item::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -30px;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .promotion-item:last-child::before {
+      display: none;
+    }
+
+    .promotion-marker {
+      width: 40px;
+      height: 40px;
+      background: #f39c12;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .promotion-content {
+      flex: 1;
+      background: #fff4e6;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #f39c12;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .promotion-content:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .promotion-date {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .promotion-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #2c3e50;
+    }
+
+    .promotion-details {
+      font-size: 14px;
+      color: #666;
+    }
+
+    /* Analysis Charts */
+    .chart-container {
+      margin-top: 20px;
+    }
+
+    .chart-bar {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .chart-label {
+      width: 150px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+
+    .chart-value {
+      margin-left: auto;
+      font-size: 14px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-right: 10px;
+    }
+
+    .bar-wrapper {
+      flex: 1;
+      height: 30px;
+      background: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin: 0 15px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(to right, #3498db, #2980b9);
+      border-radius: 15px;
+      transition: width 0.6s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Engineers Section */
+    .engineers-section {
+      background: white;
+      border-radius: 12px;
+      margin-top: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .engineers-header {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      color: white;
+      padding: 20px 25px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s;
+    }
+
+    .engineers-header:hover {
+      background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
+    }
+
+    .engineers-header h2 {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .toggle-icon {
+      font-size: 24px;
+      transition: transform 0.3s;
+    }
+
+    .toggle-icon.open {
+      transform: rotate(180deg);
+    }
+
+    .engineers-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .engineers-content.open {
+      max-height: 3000px;
+    }
+
+    .engineers-inner {
+      padding: 25px;
+    }
+
+    .engineer-filters {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .engineer-rank-tab {
+      padding: 8px 16px;
+      background: #f0f0f0;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .engineer-rank-tab.active {
+      background: #9b59b6;
+      color: white;
+    }
+
+    .engineers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+    }
+
+    .engineer-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #9b59b6;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .engineer-card:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .engineer-name {
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 5px;
+    }
+
+    .engineer-details {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .normalized-name {
+      font-size: 12px;
+      color: #999;
+      font-style: italic;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th {
+      background: #34495e;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 14px;
+    }
+
+    tr {
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    tr:hover {
+      background: #f8f9fa;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .clickable-name {
+      color: #3498db;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .clickable-name:hover {
+      color: #2980b9;
+    }
+
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -30px;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-marker {
+      width: 40px;
+      height: 40px;
+      background: #3498db;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-content {
+      flex: 1;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+    }
+
+    .timeline-date {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .timeline-details {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .related-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .related-section h3 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+
+    .related-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid transparent;
+    }
+
+    .related-item:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+      border-left-color: #3498db;
+    }
+
+    .person-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .person-card:hover {
+      background: #e9ecef;
+      transform: translateX(5px);
+    }
+
+    .person-name {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .person-info {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal-content {
+      background: white;
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 30px;
+      border-radius: 12px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      position: sticky;
+      top: -30px;
+      background: white;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .modal-close {
+      font-size: 28px;
+      cursor: pointer;
+      color: #666;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .status {
+      margin-top: 15px;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      resize: vertical;
+      transition: border-color 0.3s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .header-content {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+      
+      .header-right {
+        flex-direction: column;
+      }
+      
+      .filter-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .search-section {
+        position: relative;
+        top: 0;
+      }
+      
+      .engineers-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Container -->
+  <div id="loginContainer" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1>📋 Posting Manager</h1>
+        <p>Please login to continue</p>
+      </div>
+      <form class="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Enter your password">
+        </div>
+        <button type="submit" class="login-button">Login</button>
+        <div id="loginError" class="login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App Container -->
+  <div id="appContainer" class="app-container">
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <h1>📋 Advanced Posting Notice Manager</h1>
+          <p>Track personnel movements, current positions and promotions</p>
+        </div>
+        <div class="header-right">
+          <div class="user-info">
+            <div class="user-email" id="userEmail"></div>
+          </div>
+          <button class="logout-button" onclick="handleLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- Advanced Search Section -->
+      <div class="search-section">
+        <div class="search-tabs">
+          <button class="tab-button active" onclick="switchTab('current')">Current Positions</button>
+          <button class="tab-button" onclick="switchTab('general')">General Search</button>
+          <button class="tab-button" onclick="switchTab('person')">Person History</button>
+          <button class="tab-button" onclick="switchTab('position')">Position History</button>
+          <button class="tab-button" onclick="switchTab('promotions')">Promotions</button>
+          <button class="tab-button" onclick="switchTab('analysis')">Data Analysis</button>
+        </div>
+
+        <!-- Current Positions Tab -->
+        <div id="currentTab" class="tab-content active">
+          <div class="toggle-container">
+            <div class="toggle-switch" id="engineerToggleMain" onclick="toggleMainEngineerFilter()">
+              <div class="toggle-slider"></div>
+            </div>
+            <span class="toggle-label">Show Engineers/Directors Only (CE/SE/E/AE/AD/DD/D)</span>
+          </div>
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Department/Unit</label>
+              <input type="text" id="currentDepartment" placeholder="Enter department...">
+            </div>
+            <div class="filter-group">
+              <label>Rank Filter</label>
+              <select id="currentRankFilter">
+                <option value="">All Ranks</option>
+                <option value="engineer">Engineers Only</option>
+                <option value="director">Directors Only</option>
+                <option value="both">Engineers & Directors</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="viewCurrentPositions()">📍 View Current Positions</button>
+            <button class="btn-secondary" onclick="exportCurrentPositions()">📥 Export Current</button>
+          </div>
+        </div>
+
+        <!-- General Search Tab -->
+        <div id="generalTab" class="tab-content">
+          <div class="toggle-container">
+            <div class="toggle-switch" id="engineerToggle" onclick="toggleEngineerFilter()">
+              <div class="toggle-slider"></div>
+            </div>
+            <span class="toggle-label">Show Engineers/Directors Only (CE/SE/E/AE/AD/DD/D)</span>
+          </div>
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Name</label>
+              <input type="text" id="searchName" placeholder="Enter name...">
+            </div>
+            <div class="filter-group">
+              <label>Rank</label>
+              <select id="searchRank">
+                <option value="">All Ranks</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Notice ID</label>
+              <input type="text" id="searchNoticeId" placeholder="Enter notice ID...">
+            </div>
+            <div class="filter-group">
+              <label>Notice Type</label>
+              <select id="searchNoticeType">
+                <option value="">All Types</option>
+                <option value="AA&PN">AA&PN</option>
+                <option value="U-PN">U-PN</option>
+                <option value="CEDD-PN">CEDD-PN</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="searchPostings()">🔍 Search</button>
+            <button class="btn-secondary" onclick="resetFilters()">↻ Reset</button>
+            <button class="btn-success" onclick="exportResults()">📥 Export</button>
+          </div>
+        </div>
+
+        <!-- Person History Tab -->
+        <div id="personTab" class="tab-content">
+          <div class="filter-grid">
+            <div class="filter-group" style="grid-column: span 2;">
+              <label>Select Person</label>
+              <input type="text" id="personSearch" placeholder="Type to search person..." onkeyup="searchPerson()">
+            </div>
+          </div>
+          <div id="personSuggestions"></div>
+          <div class="button-group">
+            <button onclick="viewPersonHistory()">📊 View History</button>
+          </div>
+        </div>
+
+        <!-- Position History Tab -->
+        <div id="positionTab" class="tab-content">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Unit/Position</label>
+              <input type="text" id="positionSearch" placeholder="Enter unit or position...">
+            </div>
+            <div class="filter-group">
+              <label>Search In</label>
+              <select id="positionField">
+                <option value="from">From Field</option>
+                <option value="to">To Field</option>
+                <option value="both">Both</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="viewPositionHistory()">📊 View Position History</button>
+          </div>
+        </div>
+
+        <!-- Promotions Tab -->
+        <div id="promotionsTab" class="tab-content">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Promotion Type</label>
+              <select id="promotionType">
+                <option value="all">All Promotions</option>
+                <option value="acting">Acting Only</option>
+                <option value="substantive">Substantive Only</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Date Range</label>
+              <input type="date" id="promotionDateFrom">
+            </div>
+            <div class="filter-group">
+              <label>To</label>
+              <input type="date" id="promotionDateTo">
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="viewPromotions()">⬆️ View Promotions</button>
+            <button class="btn-success" onclick="exportPromotions()">📥 Export Promotions</button>
+          </div>
+        </div>
+
+        <!-- Data Analysis Tab -->
+        <div id="analysisTab" class="tab-content">
+          <div class="button-group">
+            <button onclick="analyzeData()">📊 Analyze Data</button>
+            <button class="btn-purple" onclick="analyzePromotions()">⬆️ Promotion Analysis</button>
+            <button class="btn-success" onclick="analyzeTrends()">📈 Trend Analysis</button>
+          </div>
+          <div id="analysisResults"></div>
+        </div>
+      </div>
+
+      <!-- Statistics Dashboard -->
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <h3 id="totalCount">0</h3>
+          <p>Total Postings</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="peopleCount">0</h3>
+          <p>Total Personnel</p>
+        </div>
+        <div class="stat-card purple">
+          <h3 id="engineerCount">0</h3>
+          <p>Engineers</p>
+        </div>
+        <div class="stat-card orange">
+          <h3 id="directorCount">0</h3>
+          <p>Directors</p>
+        </div>
+        <div class="stat-card green">
+          <h3 id="currentPositionsCount">0</h3>
+          <p>Current Positions</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="actingCount">0</h3>
+          <p>Acting Appointments</p>
+        </div>
+      </div>
+
+      <!-- Current Positions Section -->
+      <div id="currentPositionsSection" class="current-positions-section" style="display: none;">
+        <h2>📍 Current Positions by Department</h2>
+        <div id="currentPositionsContent"></div>
+      </div>
+
+      <!-- Results Section -->
+      <div class="card">
+        <h2>📊 Search Results</h2>
+        <div id="searchStatus" class="status"></div>
+        <div id="results"></div>
+      </div>
+
+      <!-- Upload Section -->
+      <div class="card">
+        <h2>📤 Upload JSON Data</h2>
+        <p style="color: #666; margin-bottom: 15px;">Upload posting data in JSON format. Duplicate entries (by noticeId) will be automatically detected and prevented.</p>
+        <textarea id="jsonInput" placeholder='[
+  {
+    "name": "John Doe",
+    "rank": "Captain",
+    "from": "Unit A",
+    "to": "Unit B",
+    "dateFrom": "2024-01-01",
+    "dateTo": "2024-12-31",
+    "noticeId": "PN-2024-001",
+    "noticeType": "AA&PN",
+    "remarks": "Transfer"
+  }
+]'></textarea>
+        <div class="button-group">
+          <button onclick="uploadToFirestore()">📤 Upload to Firebase</button>
+          <button class="btn-secondary" onclick="clearInput()">🗑️ Clear</button>
+          <button class="btn-secondary" onclick="downloadTemplate()">📄 Download Template</button>
+        </div>
+        <div id="uploadStatus" class="status"></div>
+      </div>
+
+      <!-- Engineers Section -->
+      <div class="engineers-section">
+        <div class="engineers-header" onclick="toggleEngineersSection()">
+          <h2>👷 Engineering & Director Personnel Directory</h2>
+          <span class="toggle-icon" id="engineersToggle">▼</span>
+        </div>
+        <div class="engineers-content" id="engineersContent">
+          <div class="engineers-inner">
+            <div class="engineer-filters" id="engineerFilters"></div>
+            <div id="engineersStats"></div>
+            <div id="engineersList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="detailModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Details</h2>
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDc0NVogv24jSepYYKS1Dbw3Y32IlRBJ_A",
+      authDomain: "posting-notice.firebaseapp.com",
+      projectId: "posting-notice",
+      storageBucket: "posting-notice.firebasestorage.app",
+      messagingSenderId: "245130394809",
+      appId: "1:245130394809:web:c428677d6cc884ef0eaf68",
+      measurementId: "G-TY0K1VQPX5"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // Global data storage
+    let allPostings = [];
+    let allPeople = new Set();
+    let allRanks = new Set();
+    let allUnits = new Set();
+    let currentUser = null;
+    let engineerFilterActive = false;
+    let mainEngineerFilterActive = false;
+    
+    // Define engineer and director ranks
+    const engineerRanks = ['Chief Engineer', 'Senior Engineer', 'Engineer', 'Assistant Engineer'];
+    const engineerAbbreviations = ['CE', 'SE', 'E', 'AE'];
+    const directorRanks = ['Director', 'Deputy Director', 'Assistant Director'];
+    const directorAbbreviations = ['D', 'DD', 'AD'];
+
+    // Auth state listener
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        document.getElementById('userEmail').textContent = user.email;
+        initializeApp();
+      } else {
+        currentUser = null;
+        document.getElementById('loginContainer').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
+      }
+    });
+
+    // Handle login
+    async function handleLogin(event) {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('loginError');
+      
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        errorDiv.textContent = '';
+      } catch (error) {
+        errorDiv.textContent = error.message;
+      }
+    }
+
+    // Handle logout
+    async function handleLogout() {
+      try {
+        await auth.signOut();
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    // Initialize app after login
+    async function initializeApp() {
+      await loadAllData();
+      updateStatistics();
+      populateFilters();
+      loadEngineersSection();
+    }
+
+    // Normalize name (remove titles like Miss/Ms/Mr)
+    function normalizeName(name) {
+      if (!name) return '';
+      
+      // Remove common titles
+      const titles = ['Miss', 'Ms', 'Mr', 'Mrs', 'Dr', 'Prof'];
+      let normalized = name;
+      
+      titles.forEach(title => {
+        const regex = new RegExp(`^${title}\\.?\\s+`, 'i');
+        normalized = normalized.replace(regex, '');
+      });
+      
+      return normalized.trim();
+    }
+
+    // Check if rank is engineer or director
+    function isEngineerOrDirectorRank(rank) {
+      if (!rank) return false;
+      
+      const rankLower = rank.toLowerCase();
+      
+      // Check full engineer ranks
+      for (let er of engineerRanks) {
+        if (rankLower === er.toLowerCase()) return true;
+      }
+      
+      // Check engineer abbreviations
+      for (let abbr of engineerAbbreviations) {
+        if (rank === abbr || rank === abbr + '/') return true;
+      }
+      
+      // Check full director ranks
+      for (let dr of directorRanks) {
+        if (rankLower === dr.toLowerCase()) return true;
+      }
+      
+      // Check director abbreviations
+      for (let abbr of directorAbbreviations) {
+        if (rank === abbr || rank === abbr + '/') return true;
+      }
+      
+      // Check if contains engineer but not other professions
+      if (rankLower.includes('engineer') && 
+          !rankLower.includes('surveyor') && 
+          !rankLower.includes('architect') &&
+          !rankLower.includes('planner')) {
+        return true;
+      }
+      
+      // Check if contains director
+      if (rankLower.includes('director')) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Check if rank is engineer
+    function isEngineerRank(rank) {
+      if (!rank) return false;
+      
+      const rankLower = rank.toLowerCase();
+      
+      // Check full engineer ranks
+      for (let er of engineerRanks) {
+        if (rankLower === er.toLowerCase()) return true;
+      }
+      
+      // Check abbreviations
+      for (let abbr of engineerAbbreviations) {
+        if (rank === abbr || rank === abbr + '/') return true;
+      }
+      
+      // Check if contains engineer but not other professions
+      if (rankLower.includes('engineer') && 
+          !rankLower.includes('surveyor') && 
+          !rankLower.includes('architect') &&
+          !rankLower.includes('planner')) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Check if rank is director
+    function isDirectorRank(rank) {
+      if (!rank) return false;
+      
+      const rankLower = rank.toLowerCase();
+      
+      // Check full director ranks
+      for (let dr of directorRanks) {
+        if (rankLower === dr.toLowerCase()) return true;
+      }
+      
+      // Check abbreviations
+      for (let abbr of directorAbbreviations) {
+        if (rank === abbr || rank === abbr + '/') return true;
+      }
+      
+      // Check if contains director
+      if (rankLower.includes('director')) {
+        return true;
+      }
+      
+      return false;
+    }
+
+    // Toggle main engineer filter
+    function toggleMainEngineerFilter() {
+      const toggle = document.getElementById('engineerToggleMain');
+      mainEngineerFilterActive = !mainEngineerFilterActive;
+      
+      if (mainEngineerFilterActive) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+    }
+
+    // Toggle engineer filter
+    function toggleEngineerFilter() {
+      const toggle = document.getElementById('engineerToggle');
+      engineerFilterActive = !engineerFilterActive;
+      
+      if (engineerFilterActive) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+      
+      // Re-run current search with new filter
+      searchPostings();
+    }
+
+    // Load all data from Firestore
+    async function loadAllData() {
+      try {
+        const snapshot = await db.collection("postings").get();
+        allPostings = [];
+        allPeople.clear();
+        allRanks.clear();
+        allUnits.clear();
+        
+        snapshot.forEach(doc => {
+          const data = { id: doc.id, ...doc.data() };
+          // Add normalized name
+          data.normalizedName = normalizeName(data.name);
+          allPostings.push(data);
+          
+          if (data.name) allPeople.add(data.name);
+          if (data.rank) allRanks.add(data.rank);
+          if (data.from) allUnits.add(data.from);
+          if (data.to) allUnits.add(data.to);
+        });
+        
+        // Sort all postings by date
+        allPostings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+        
+      } catch (error) {
+        console.error("Error loading data:", error);
+      }
+    }
+
+    // Get current positions
+    function getCurrentPositions() {
+      const currentPositions = {};
+      const processedPeople = new Set();
+      
+      // Sort by date descending to get most recent positions
+      const sortedPostings = [...allPostings].sort((a, b) => 
+        (b.dateFrom || '').localeCompare(a.dateFrom || '')
+      );
+      
+      sortedPostings.forEach(posting => {
+        const normalizedName = posting.normalizedName;
+        
+        // Skip if we've already found a current position for this person
+        if (processedPeople.has(normalizedName)) return;
+        
+        // Consider a position current if:
+        // 1. dateTo is empty/null (ongoing)
+        // 2. dateTo is in the future
+        const today = new Date().toISOString().split('T')[0];
+        const isCurrent = !posting.dateTo || posting.dateTo >= today;
+        
+        if (isCurrent && posting.to) {
+          processedPeople.add(normalizedName);
+          
+          if (!currentPositions[posting.to]) {
+            currentPositions[posting.to] = [];
+          }
+          
+          // Check if it's an acting appointment
+          const isActing = posting.remarks && 
+            (posting.remarks.toLowerCase().includes('acting') || 
+             posting.remarks.toLowerCase().includes('ag'));
+          
+          currentPositions[posting.to].push({
+            ...posting,
+            isActing: isActing
+          });
+        }
+      });
+      
+      return currentPositions;
+    }
+
+    // View current positions
+    function viewCurrentPositions() {
+      const department = document.getElementById('currentDepartment').value.toLowerCase();
+      const rankFilter = document.getElementById('currentRankFilter').value;
+      const section = document.getElementById('currentPositionsSection');
+      const content = document.getElementById('currentPositionsContent');
+      
+      const currentPositions = getCurrentPositions();
+      
+      let filteredDepartments = Object.entries(currentPositions);
+      
+      // Filter by department
+      if (department) {
+        filteredDepartments = filteredDepartments.filter(([dept, personnel]) => 
+          dept.toLowerCase().includes(department)
+        );
+      }
+      
+      // Filter by rank type
+      if (rankFilter || mainEngineerFilterActive) {
+        filteredDepartments = filteredDepartments.map(([dept, personnel]) => {
+          let filtered = personnel;
+          
+          if (mainEngineerFilterActive || rankFilter === 'both') {
+            filtered = filtered.filter(p => isEngineerOrDirectorRank(p.rank));
+          } else if (rankFilter === 'engineer') {
+            filtered = filtered.filter(p => isEngineerRank(p.rank));
+          } else if (rankFilter === 'director') {
+            filtered = filtered.filter(p => isDirectorRank(p.rank));
+          }
+          
+          return [dept, filtered];
+        }).filter(([dept, personnel]) => personnel.length > 0);
+      }
+      
+      // Sort departments by name
+      filteredDepartments.sort(([a], [b]) => a.localeCompare(b));
+      
+      let html = '<div class="department-grid">';
+      
+      filteredDepartments.forEach(([dept, personnel]) => {
+        // Sort personnel by rank hierarchy and name
+        personnel.sort((a, b) => {
+          const rankOrder = ['D', 'Director', 'DD', 'Deputy Director', 'AD', 'Assistant Director', 
+                           'CE', 'Chief Engineer', 'SE', 'Senior Engineer', 'E', 'Engineer', 
+                           'AE', 'Assistant Engineer'];
+          
+          const aIndex = rankOrder.findIndex(r => a.rank && a.rank.includes(r));
+          const bIndex = rankOrder.findIndex(r => b.rank && b.rank.includes(r));
+          
+          if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+          return a.name.localeCompare(b.name);
+        });
+        
+        html += `
+          <div class="department-card">
+            <div class="department-header">
+              <div class="department-name">${dept}</div>
+              <div class="department-count">${personnel.length}</div>
+            </div>
+            <div class="personnel-list">
+        `;
+        
+        personnel.forEach(person => {
+          html += `
+            <div class="personnel-item" onclick="viewPostingDetails('${person.id}')">
+              <div>
+                <span class="personnel-name">${person.name}</span>
+                <span class="personnel-rank">${person.rank || 'N/A'}</span>
+                ${person.isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div class="personnel-date">Since ${person.dateFrom || 'N/A'}</div>
+            </div>
+          `;
+        });
+        
+        html += `
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      
+      if (filteredDepartments.length === 0) {
+        html = '<p class="no-results">No current positions found with the selected filters.</p>';
+      }
+      
+      content.innerHTML = html;
+      section.style.display = 'block';
+      
+      // Scroll to the section
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Export current positions
+    function exportCurrentPositions() {
+      const currentPositions = getCurrentPositions();
+      
+      let csv = 'Department,Name,Rank,Position Type,Start Date,Remarks\n';
+      
+      Object.entries(currentPositions).sort(([a], [b]) => a.localeCompare(b)).forEach(([dept, personnel]) => {
+        personnel.forEach(person => {
+          const positionType = person.isActing ? 'Acting' : 'Substantive';
+          csv += `"${dept}","${person.name}","${person.rank || 'N/A'}","${positionType}","${person.dateFrom || 'N/A'}","${person.remarks || ''}"\n`;
+        });
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `current_positions_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // Update statistics
+    function updateStatistics() {
+      document.getElementById('totalCount').textContent = allPostings.length;
+      document.getElementById('peopleCount').textContent = allPeople.size;
+      
+      // Count engineers
+      const engineers = allPostings.filter(p => isEngineerRank(p.rank));
+      const uniqueEngineers = new Set(engineers.map(e => e.normalizedName));
+      document.getElementById('engineerCount').textContent = uniqueEngineers.size;
+      
+      // Count directors
+      const directors = allPostings.filter(p => isDirectorRank(p.rank));
+      const uniqueDirectors = new Set(directors.map(d => d.normalizedName));
+      document.getElementById('directorCount').textContent = uniqueDirectors.size;
+      
+      // Count current positions
+      const currentPositions = getCurrentPositions();
+      const totalCurrentPositions = Object.values(currentPositions).reduce((sum, dept) => sum + dept.length, 0);
+      document.getElementById('currentPositionsCount').textContent = totalCurrentPositions;
+      
+      // Count acting appointments
+      const actingAppointments = allPostings.filter(p => 
+        p.remarks && (p.remarks.toLowerCase().includes('acting') || p.remarks.toLowerCase().includes('ag'))
+      );
+      const uniqueActing = new Set(actingAppointments.map(a => a.normalizedName));
+      document.getElementById('actingCount').textContent = uniqueActing.size;
+    }
+
+    // Detect promotions
+    function detectPromotions() {
+      const promotions = [];
+      const peoplePostings = {};
+      
+      // Group postings by normalized name
+      allPostings.forEach(posting => {
+        const normalizedName = posting.normalizedName;
+        if (!peoplePostings[normalizedName]) {
+          peoplePostings[normalizedName] = [];
+        }
+        peoplePostings[normalizedName].push(posting);
+      });
+      
+      // Check for promotions
+      Object.entries(peoplePostings).forEach(([normalizedName, postings]) => {
+        postings.sort((a, b) => (a.dateFrom || '').localeCompare(b.dateFrom || ''));
+        
+        for (let i = 1; i < postings.length; i++) {
+          const prevRank = postings[i-1].rank;
+          const currRank = postings[i].rank;
+          
+          if (prevRank && currRank && isPromotion(prevRank, currRank)) {
+            // Check if it's acting
+            const isActing = postings[i].remarks && 
+              (postings[i].remarks.toLowerCase().includes('acting') || 
+               postings[i].remarks.toLowerCase().includes('ag'));
+            
+            promotions.push({
+              name: postings[i].name,
+              normalizedName: normalizedName,
+              fromRank: prevRank,
+              toRank: currRank,
+              date: postings[i].dateFrom,
+              posting: postings[i],
+              isActing: isActing
+            });
+          }
+        }
+      });
+      
+      return promotions;
+    }
+
+    // Check if rank change is a promotion
+    function isPromotion(fromRank, toRank) {
+      // Define rank hierarchy
+      const rankHierarchy = {
+        'Assistant Engineer': 1, 'AE': 1,
+        'Engineer': 2, 'E': 2,
+        'Senior Engineer': 3, 'SE': 3,
+        'Chief Engineer': 4, 'CE': 4,
+        'Assistant Director': 5, 'AD': 5,
+        'Deputy Director': 6, 'DD': 6,
+        'Director': 7, 'D': 7,
+        'Assistant': 1,
+        'Junior': 2,
+        'Senior': 4,
+        'Chief': 5,
+        'Principal': 6,
+        'Manager': 7,
+      };
+      
+      let fromLevel = 0;
+      let toLevel = 0;
+      
+      // Check each hierarchy level
+      Object.entries(rankHierarchy).forEach(([key, level]) => {
+        if (fromRank.includes(key)) fromLevel = Math.max(fromLevel, level);
+        if (toRank.includes(key)) toLevel = Math.max(toLevel, level);
+      });
+      
+      return toLevel > fromLevel;
+    }
+
+    // View promotions
+    function viewPromotions() {
+      const promotionType = document.getElementById('promotionType').value;
+      const dateFrom = document.getElementById('promotionDateFrom').value;
+      const dateTo = document.getElementById('promotionDateTo').value;
+      
+      let promotions = detectPromotions();
+      
+      // Filter by promotion type
+      if (promotionType === 'acting') {
+        promotions = promotions.filter(p => p.isActing);
+      } else if (promotionType === 'substantive') {
+        promotions = promotions.filter(p => !p.isActing);
+      }
+      
+      // Filter by date range
+      if (dateFrom) {
+        promotions = promotions.filter(p => p.date >= dateFrom);
+      }
+      if (dateTo) {
+        promotions = promotions.filter(p => p.date <= dateTo);
+      }
+      
+      // Filter to only engineers and directors
+      promotions = promotions.filter(p => 
+        isEngineerOrDirectorRank(p.fromRank) || isEngineerOrDirectorRank(p.toRank)
+      );
+      
+      // Sort by date descending
+      promotions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
+      const container = document.getElementById('results');
+      
+      if (promotions.length === 0) {
+        container.innerHTML = '<p class="no-results">No promotions found with the selected criteria.</p>';
+        return;
+      }
+      
+      let html = `<h3 style="margin-bottom: 20px;">Found ${promotions.length} promotion(s)</h3>`;
+      html += '<div class="promotion-timeline">';
+      
+      promotions.forEach((promo, index) => {
+        html += `
+          <div class="promotion-item">
+            <div class="promotion-marker">
+              ${promo.isActing ? 'AG' : '⬆'}
+            </div>
+            <div class="promotion-content" onclick="viewPostingDetails('${promo.posting.id}')">
+              <div class="promotion-date">${promo.date || 'N/A'}</div>
+              <div class="promotion-title">
+                ${promo.name}
+                ${promo.isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div class="promotion-details">
+                <strong>Promoted from:</strong> ${promo.fromRank}<br>
+                <strong>Promoted to:</strong> ${promo.toRank}<br>
+                <strong>New position:</strong> ${promo.posting.to || 'N/A'}<br>
+                ${promo.posting.remarks ? `<strong>Remarks:</strong> ${promo.posting.remarks}` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      container.innerHTML = html;
+      
+      const status = document.getElementById('searchStatus');
+      showStatus(status, 'success', `Found ${promotions.length} promotion(s)`);
+    }
+
+    // Export promotions
+    function exportPromotions() {
+      const promotionType = document.getElementById('promotionType').value;
+      const dateFrom = document.getElementById('promotionDateFrom').value;
+      const dateTo = document.getElementById('promotionDateTo').value;
+      
+      let promotions = detectPromotions();
+      
+      // Apply same filters as viewPromotions
+      if (promotionType === 'acting') {
+        promotions = promotions.filter(p => p.isActing);
+      } else if (promotionType === 'substantive') {
+        promotions = promotions.filter(p => !p.isActing);
+      }
+      
+      if (dateFrom) {
+        promotions = promotions.filter(p => p.date >= dateFrom);
+      }
+      if (dateTo) {
+        promotions = promotions.filter(p => p.date <= dateTo);
+      }
+      
+      promotions = promotions.filter(p => 
+        isEngineerOrDirectorRank(p.fromRank) || isEngineerOrDirectorRank(p.toRank)
+      );
+      
+      promotions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
+      let csv = 'Date,Name,Promotion Type,From Rank,To Rank,New Position,Notice ID,Remarks\n';
+      
+      promotions.forEach(promo => {
+        const type = promo.isActing ? 'Acting' : 'Substantive';
+        csv += `"${promo.date || 'N/A'}","${promo.name}","${type}","${promo.fromRank}","${promo.toRank}","${promo.posting.to || 'N/A'}","${promo.posting.noticeId || 'N/A'}","${promo.posting.remarks || ''}"\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `promotions_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // Populate filter dropdowns
+    function populateFilters() {
+      const rankSelect = document.getElementById('searchRank');
+      rankSelect.innerHTML = '<option value="">All Ranks</option>';
+      Array.from(allRanks).sort().forEach(rank => {
+        rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`;
+      });
+    }
+
+    // Switch tabs
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      // Hide current positions section when switching tabs
+      if (tabName !== 'current') {
+        document.getElementById('currentPositionsSection').style.display = 'none';
+      }
+    }
+
+    // Search postings
+    async function searchPostings() {
+      const name = document.getElementById('searchName').value.trim();
+      const rank = document.getElementById('searchRank').value;
+      const noticeId = document.getElementById('searchNoticeId').value.trim();
+      const noticeType = document.getElementById('searchNoticeType').value;
+
+      const status = document.getElementById('searchStatus');
+      status.innerHTML = '<span class="loader"></span> Searching...';
+      status.className = 'status info';
+
+      try {
+        let results = allPostings;
+        
+        // Apply name filter with normalization
+        if (name) {
+          const searchNameNormalized = normalizeName(name).toLowerCase();
+          results = results.filter(p => {
+            return p.name && (
+              p.name.toLowerCase().includes(name.toLowerCase()) ||
+              p.normalizedName.toLowerCase().includes(searchNameNormalized)
+            );
+          });
+        }
+        
+        if (rank) {
+          results = results.filter(p => p.rank === rank);
+        }
+        if (noticeId) {
+          results = results.filter(p => p.noticeId === noticeId);
+        }
+        if (noticeType) {
+          results = results.filter(p => p.noticeType === noticeType);
+        }
+        
+        // Apply engineer/director filter if active
+        if (engineerFilterActive) {
+          results = results.filter(p => isEngineerOrDirectorRank(p.rank));
+        }
+        
+        // Sort by date
+        results.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+        
+        renderResultsGrouped(results);
+        showStatus(status, 'success', `Found ${results.length} results${engineerFilterActive ? ' (Engineers/Directors only)' : ''}`);
+
+      } catch (error) {
+        showStatus(status, 'error', `❌ Search error: ${error.message}`);
+      }
+    }
+
+    // Render results grouped by date
+    function renderResultsGrouped(data) {
+      const container = document.getElementById('results');
+      
+      if (data.length === 0) {
+        container.innerHTML = '<p class="no-results">No results found. Try adjusting your search criteria.</p>';
+        return;
+      }
+
+      // Group by date
+      const groupedByDate = {};
+      data.forEach(posting => {
+        const date = posting.dateFrom || 'No Date';
+        if (!groupedByDate[date]) {
+          groupedByDate[date] = [];
+        }
+        groupedByDate[date].push(posting);
+      });
+
+      let html = `<p style="margin-bottom: 20px;">Showing ${data.length} result(s)</p>`;
+      
+      // Sort dates in descending order
+      const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
+        if (a === 'No Date') return 1;
+        if (b === 'No Date') return -1;
+        return b.localeCompare(a);
+      });
+
+      sortedDates.forEach(date => {
+        const postings = groupedByDate[date];
+        
+        html += `
+          <div class="date-group">
+            <div class="date-header">
+              <h3>${date}</h3>
+              <span class="date-badge">${postings.length} posting(s)</span>
+            </div>
+            <div class="date-content">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Rank</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Date To</th>
+                    <th>Notice</th>
+                    <th>Remarks</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        postings.forEach(d => {
+          const isActing = d.remarks && 
+            (d.remarks.toLowerCase().includes('acting') || 
+             d.remarks.toLowerCase().includes('ag'));
+          
+          html += `<tr onclick="viewPostingDetails('${d.id}')" style="cursor: pointer;">
+            <td>
+              <span class="clickable-name">${d.name}</span>
+              ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              ${d.name !== d.normalizedName ? `<br><span class="normalized-name">(${d.normalizedName})</span>` : ''}
+            </td>
+            <td>${d.rank || '—'}</td>
+            <td>${d.from || '—'}</td>
+            <td>${d.to || '—'}</td>
+            <td>${d.dateTo || 'Present'}</td>
+            <td>${d.noticeId}<br><small style="color: #666;">${d.noticeType}</small></td>
+            <td>${d.remarks || '—'}</td>
+            <td onclick="event.stopPropagation()">
+              <button class="btn-danger" onclick="deletePosting('${d.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
+            </td>
+          </tr>`;
+        });
+
+        html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Analyze data
+    function analyzeData() {
+      const container = document.getElementById('analysisResults');
+      
+      // Rank distribution
+      const rankCounts = {};
+      allPostings.forEach(p => {
+        if (p.rank) {
+          rankCounts[p.rank] = (rankCounts[p.rank] || 0) + 1;
+        }
+      });
+      
+      // Sort by count
+      const sortedRanks = Object.entries(rankCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+      
+      // Unit distribution
+      const unitCounts = {};
+      allPostings.forEach(p => {
+        if (p.to) {
+          unitCounts[p.to] = (unitCounts[p.to] || 0) + 1;
+        }
+      });
+      
+      const sortedUnits = Object.entries(unitCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+      
+      let html = '<div style="margin-top: 20px;">';
+      
+      // Rank distribution chart
+      html += '<h3 style="margin-bottom: 15px;">Top 10 Ranks by Posting Count</h3>';
+      html += '<div class="chart-container">';
+      const maxRankCount = Math.max(...sortedRanks.map(r => r[1]));
+      sortedRanks.forEach(([rank, count]) => {
+        const percentage = (count / maxRankCount) * 100;
+        const isEngineer = isEngineerRank(rank);
+        const isDirector = isDirectorRank(rank);
+        let bgColor = '';
+        if (isEngineer) bgColor = 'background: linear-gradient(to right, #9b59b6, #8e44ad);';
+        else if (isDirector) bgColor = 'background: linear-gradient(to right, #f39c12, #e67e22);';
+        
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label">${rank}${isEngineer ? ' 👷' : ''}${isDirector ? ' 👔' : ''}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; ${bgColor}">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      // Unit distribution chart
+      html += '<h3 style="margin: 30px 0 15px;">Top 10 Destination Units</h3>';
+      html += '<div class="chart-container">';
+      const maxUnitCount = Math.max(...sortedUnits.map(u => u[1]));
+      sortedUnits.forEach(([unit, count]) => {
+        const percentage = (count / maxUnitCount) * 100;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label" style="width: 200px;">${unit.substring(0, 30)}${unit.length > 30 ? '...' : ''}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #27ae60, #229954);">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Analyze promotions
+    function analyzePromotions() {
+      const container = document.getElementById('analysisResults');
+      const promotions = detectPromotions();
+      
+      // Filter to engineers and directors only
+      const relevantPromotions = promotions.filter(p => 
+        isEngineerOrDirectorRank(p.fromRank) || isEngineerOrDirectorRank(p.toRank)
+      );
+      
+      relevantPromotions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
+      // Separate acting and substantive
+      const actingPromotions = relevantPromotions.filter(p => p.isActing);
+      const substantivePromotions = relevantPromotions.filter(p => !p.isActing);
+      
+      let html = '<div style="margin-top: 20px;">';
+      html += `<h3 style="margin-bottom: 15px;">Engineer & Director Promotions</h3>`;
+      html += `<p style="margin-bottom: 20px;">Total: ${relevantPromotions.length} (Acting: ${actingPromotions.length}, Substantive: ${substantivePromotions.length})</p>`;
+      
+      if (relevantPromotions.length === 0) {
+        html += '<p style="color: #666;">No promotions detected for engineers or directors.</p>';
+      } else {
+        // Show recent promotions
+        html += '<h4 style="margin: 20px 0 15px;">Recent Promotions</h4>';
+        relevantPromotions.slice(0, 20).forEach(promo => {
+          html += `
+            <div class="promotion-item" onclick="viewPostingDetails('${promo.posting.id}')" style="background: ${promo.isActing ? '#fff4e6' : '#f8f9fa'};">
+              <div class="promotion-header">
+                <span class="promotion-name">${promo.name}</span>
+                <span class="promotion-badge" style="background: ${promo.isActing ? '#f39c12' : '#27ae60'};">
+                  ${promo.isActing ? 'ACTING' : 'PROMOTED'}
+                </span>
+              </div>
+              <div class="promotion-details">
+                ${promo.fromRank} → ${promo.toRank} • ${promo.date || 'N/A'}
+              </div>
+            </div>
+          `;
+        });
+        
+        if (relevantPromotions.length > 20) {
+          html += `<p style="text-align: center; margin-top: 20px; color: #666;">Showing top 20 of ${relevantPromotions.length} promotions</p>`;
+        }
+      }
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Analyze trends
+    function analyzeTrends() {
+      const container = document.getElementById('analysisResults');
+      
+      // Group by year
+      const yearCounts = {};
+      allPostings.forEach(p => {
+        if (p.dateFrom) {
+          const year = p.dateFrom.substring(0, 4);
+          yearCounts[year] = (yearCounts[year] || 0) + 1;
+        }
+      });
+      
+      const sortedYears = Object.entries(yearCounts)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+      
+      // Monthly trends for current year
+      const currentYear = new Date().getFullYear().toString();
+      const monthCounts = {};
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      allPostings.forEach(p => {
+        if (p.dateFrom && p.dateFrom.startsWith(currentYear)) {
+          const month = parseInt(p.dateFrom.substring(5, 7)) - 1;
+          monthCounts[month] = (monthCounts[month] || 0) + 1;
+        }
+      });
+      
+      let html = '<div style="margin-top: 20px;">';
+      
+      // Yearly trends
+      html += '<h3 style="margin-bottom: 15px;">Postings by Year</h3>';
+      html += '<div class="chart-container">';
+      const maxYearCount = Math.max(...sortedYears.map(y => y[1]));
+      sortedYears.forEach(([year, count]) => {
+        const percentage = (count / maxYearCount) * 100;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label">${year}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #f39c12, #e67e22);">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      // Monthly trends
+      html += `<h3 style="margin: 30px 0 15px;">Monthly Trends - ${currentYear}</h3>`;
+      html += '<div class="chart-container">';
+      const maxMonthCount = Math.max(...Object.values(monthCounts));
+      monthNames.forEach((month, index) => {
+        const count = monthCounts[index] || 0;
+        const percentage = maxMonthCount > 0 ? (count / maxMonthCount) * 100 : 0;
+        html += `
+          <div class="chart-bar">
+            <div class="chart-label" style="width: 60px;">${month}</div>
+            <div class="bar-wrapper">
+              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #9b59b6, #8e44ad);">
+                ${count}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Toggle engineers section
+    function toggleEngineersSection() {
+      const content = document.getElementById('engineersContent');
+      const toggle = document.getElementById('engineersToggle');
+      
+      if (content.classList.contains('open')) {
+        content.classList.remove('open');
+        toggle.classList.remove('open');
+      } else {
+        content.classList.add('open');
+        toggle.classList.add('open');
+        loadEngineersSection();
+      }
+    }
+
+    // Load engineers section
+    function loadEngineersSection() {
+      const engineersAndDirectors = allPostings.filter(p => isEngineerOrDirectorRank(p.rank));
+      
+      // Group by rank
+      const byRank = {};
+      engineersAndDirectors.forEach(person => {
+        if (!byRank[person.rank]) {
+          byRank[person.rank] = [];
+        }
+        byRank[person.rank].push(person);
+      });
+      
+      // Create filters
+      const filtersDiv = document.getElementById('engineerFilters');
+      filtersDiv.innerHTML = '<button class="engineer-rank-tab active" onclick="filterEngineers(\'all\')">All Personnel</button>';
+      
+      // Sort ranks by hierarchy
+      const rankOrder = ['Director', 'D', 'Deputy Director', 'DD', 'Assistant Director', 'AD',
+                        'Chief Engineer', 'CE', 'Senior Engineer', 'SE', 'Engineer', 'E', 'Assistant Engineer', 'AE'];
+      const sortedRanks = Object.keys(byRank).sort((a, b) => {
+        const aIndex = rankOrder.findIndex(r => a.includes(r));
+        const bIndex = rankOrder.findIndex(r => b.includes(r));
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        return a.localeCompare(b);
+      });
+      
+      sortedRanks.forEach(rank => {
+        filtersDiv.innerHTML += `<button class="engineer-rank-tab" onclick="filterEngineers('${rank}')">${rank} (${byRank[rank].length})</button>`;
+      });
+      
+      // Stats
+      const statsDiv = document.getElementById('engineersStats');
+      const uniquePersonnel = new Set(engineersAndDirectors.map(e => e.normalizedName));
+      const engineers = engineersAndDirectors.filter(p => isEngineerRank(p.rank));
+      const directors = engineersAndDirectors.filter(p => isDirectorRank(p.rank));
+      
+      statsDiv.innerHTML = `
+        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <strong>Total Postings:</strong> ${engineersAndDirectors.length} | 
+          <strong>Unique Personnel:</strong> ${uniquePersonnel.size} | 
+          <strong>Engineers:</strong> ${new Set(engineers.map(e => e.normalizedName)).size} | 
+          <strong>Directors:</strong> ${new Set(directors.map(d => d.normalizedName)).size}
+        </div>
+      `;
+      
+      // Display all initially
+      displayEngineers(engineersAndDirectors);
+    }
+
+    // Filter engineers
+    function filterEngineers(rank) {
+      // Update active tab
+      document.querySelectorAll('.engineer-rank-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Filter data
+      let filtered;
+      if (rank === 'all') {
+        filtered = allPostings.filter(p => isEngineerOrDirectorRank(p.rank));
+      } else {
+        filtered = allPostings.filter(p => p.rank === rank);
+      }
+      
+      displayEngineers(filtered);
+    }
+
+    // Display engineers
+    function displayEngineers(personnel) {
+      const container = document.getElementById('engineersList');
+      
+      // Sort by date
+      personnel.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      let html = '<div class="engineers-grid">';
+      personnel.forEach(person => {
+        const isActing = person.remarks && 
+          (person.remarks.toLowerCase().includes('acting') || 
+           person.remarks.toLowerCase().includes('ag'));
+        
+        html += `
+          <div class="engineer-card" onclick="viewPostingDetails('${person.id}')">
+            <div class="engineer-name">
+              ${person.name}
+              ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              ${person.name !== person.normalizedName ? `<br><span class="normalized-name">(${person.normalizedName})</span>` : ''}
+            </div>
+            <div class="engineer-details">
+              <strong>${person.rank}</strong><br>
+              ${person.from || 'N/A'} → ${person.to || 'N/A'}<br>
+              ${person.dateFrom || 'N/A'} - ${person.dateTo || 'Present'}<br>
+              <small style="color: #999;">${person.noticeId} (${person.noticeType})</small>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      container.innerHTML = html;
+    }
+
+    // Search person suggestions
+    function searchPerson() {
+      const searchTerm = document.getElementById('personSearch').value.toLowerCase();
+      const suggestions = document.getElementById('personSuggestions');
+      
+      if (searchTerm.length < 2) {
+        suggestions.innerHTML = '';
+        return;
+      }
+      
+      // Search both original and normalized names
+      const peopleMap = new Map();
+      allPostings.forEach(posting => {
+        const normalizedName = posting.normalizedName;
+        if (!peopleMap.has(normalizedName)) {
+          peopleMap.set(normalizedName, {
+            names: new Set(),
+            postings: []
+          });
+        }
+        peopleMap.get(normalizedName).names.add(posting.name);
+        peopleMap.get(normalizedName).postings.push(posting);
+      });
+      
+      const matches = [];
+      peopleMap.forEach((data, normalizedName) => {
+        const allNames = Array.from(data.names).join(', ');
+        if (normalizedName.toLowerCase().includes(searchTerm) || 
+            allNames.toLowerCase().includes(searchTerm)) {
+          matches.push({
+            normalizedName: normalizedName,
+            displayName: Array.from(data.names)[0],
+            allNames: allNames,
+            rank: data.postings[0]?.rank || 'Unknown',
+            postingCount: data.postings.length
+          });
+        }
+      });
+      
+      suggestions.innerHTML = matches.slice(0, 10).map(person => {
+        return `
+          <div class="person-card" onclick="selectPerson('${person.displayName}')">
+            <div class="person-name">${person.displayName}</div>
+            <div class="person-info">
+              ${person.rank} • ${person.postingCount} posting(s)
+              ${person.allNames !== person.displayName ? `<br><small>Also as: ${person.allNames}</small>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Select person
+    function selectPerson(name) {
+      document.getElementById('personSearch').value = name;
+      document.getElementById('personSuggestions').innerHTML = '';
+    }
+
+    // View person history
+    function viewPersonHistory() {
+      const personName = document.getElementById('personSearch').value;
+      if (!personName) {
+        alert('Please select a person');
+        return;
+      }
+      
+      const normalizedSearchName = normalizeName(personName);
+      const personPostings = allPostings
+        .filter(p => p.name === personName || p.normalizedName === normalizedSearchName)
+        .sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (personPostings.length === 0) {
+        alert('No postings found for this person');
+        return;
+      }
+      
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      // Get all name variations
+      const nameVariations = new Set(personPostings.map(p => p.name));
+      const titleText = nameVariations.size > 1 
+        ? `Posting History: ${Array.from(nameVariations).join(' / ')}`
+        : `Posting History: ${personName}`;
+      
+      modalTitle.textContent = titleText;
+      
+      // Check for promotions
+      const promotions = detectPromotions();
+      const personPromotions = promotions.filter(p => p.normalizedName === normalizedSearchName);
+      
+      // Get current position
+      const today = new Date().toISOString().split('T')[0];
+      const currentPosition = personPostings.find(p => !p.dateTo || p.dateTo >= today);
+      
+      let html = '';
+      
+      if (currentPosition) {
+        html += `
+          <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #0c5460;">📍 Current Position:</strong> ${currentPosition.to} (${currentPosition.rank}) since ${currentPosition.dateFrom}
+          </div>
+        `;
+      }
+      
+      if (personPromotions.length > 0) {
+        html += `
+          <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #155724;">🎉 ${personPromotions.length} promotion(s) detected!</strong>
+          </div>
+        `;
+      }
+      
+      html += '<div class="timeline">';
+      personPostings.forEach((posting, index) => {
+        const isPromotion = personPromotions.find(p => p.posting.id === posting.id);
+        const isActing = posting.remarks && 
+          (posting.remarks.toLowerCase().includes('acting') || 
+           posting.remarks.toLowerCase().includes('ag'));
+        
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-marker" style="background: ${isPromotion ? '#f39c12' : '#3498db'}">
+              ${isPromotion ? '⬆' : index + 1}
+            </div>
+            <div class="timeline-content" style="cursor: pointer; border-left-color: ${isPromotion ? '#f39c12' : '#3498db'}" 
+                 onclick="viewPostingDetails('${posting.id}')">
+              <div class="timeline-date">${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}</div>
+              <div class="timeline-title">
+                ${posting.from || 'N/A'} → ${posting.to || 'N/A'}
+                ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div class="timeline-details">
+                <strong>Rank:</strong> ${posting.rank || 'N/A'}<br>
+                <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
+                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}<br>` : ''}
+                <strong>Name as recorded:</strong> ${posting.name}
+                ${isPromotion ? `<br><strong style="color: #f39c12;">Promoted from ${isPromotion.fromRank}</strong>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // View position history
+    function viewPositionHistory() {
+      const position = document.getElementById('positionSearch').value;
+      const field = document.getElementById('positionField').value;
+      
+      if (!position) {
+        alert('Please enter a position or unit name');
+        return;
+      }
+      
+      let positionPostings = [];
+      
+      if (field === 'from' || field === 'both') {
+        positionPostings = positionPostings.concat(
+          allPostings.filter(p => p.from && p.from.toLowerCase().includes(position.toLowerCase()))
+        );
+      }
+      
+      if (field === 'to' || field === 'both') {
+        positionPostings = positionPostings.concat(
+          allPostings.filter(p => p.to && p.to.toLowerCase().includes(position.toLowerCase()))
+        );
+      }
+      
+      const uniquePostings = Array.from(new Map(positionPostings.map(p => [p.id, p])).values());
+      uniquePostings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (uniquePostings.length === 0) {
+        alert('No postings found for this position');
+        return;
+      }
+      
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      modalTitle.textContent = `Position History: ${position}`;
+      
+      // Find current occupants
+      const today = new Date().toISOString().split('T')[0];
+      const currentOccupants = uniquePostings.filter(p => 
+        p.to && p.to.toLowerCase().includes(position.toLowerCase()) && 
+        (!p.dateTo || p.dateTo >= today)
+      );
+      
+      let html = '';
+      
+      if (currentOccupants.length > 0) {
+        html += `
+          <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: #0c5460;">📍 Current Occupants:</strong><br>
+        `;
+        currentOccupants.forEach(occupant => {
+          const isActing = occupant.remarks && 
+            (occupant.remarks.toLowerCase().includes('acting') || 
+             occupant.remarks.toLowerCase().includes('ag'));
+          html += `• ${occupant.name} (${occupant.rank}) ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}<br>`;
+        });
+        html += '</div>';
+      }
+      
+      html += '<div class="timeline">';
+      uniquePostings.forEach((posting, index) => {
+        const isIncoming = posting.to && posting.to.toLowerCase().includes(position.toLowerCase());
+        const isOutgoing = posting.from && posting.from.toLowerCase().includes(position.toLowerCase());
+        const isActing = posting.remarks && 
+          (posting.remarks.toLowerCase().includes('acting') || 
+           posting.remarks.toLowerCase().includes('ag'));
+        
+        html += `
+          <div class="timeline-item">
+            <div class="timeline-marker" style="background: ${isIncoming ? '#27ae60' : '#e74c3c'}">
+              ${isIncoming ? '→' : '←'}
+            </div>
+            <div class="timeline-content" style="border-left-color: ${isIncoming ? '#27ae60' : '#e74c3c'}; cursor: pointer;" 
+                 onclick="viewPostingDetails('${posting.id}')">
+              <div class="timeline-date">${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}</div>
+              <div class="timeline-title">
+                ${posting.name} (${posting.rank || 'N/A'})
+                ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div class="timeline-details">
+                <strong>${isIncoming ? 'Incoming from' : 'Outgoing to'}:</strong> 
+                ${isIncoming ? posting.from || 'N/A' : posting.to || 'N/A'}<br>
+                <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
+                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // View posting details
+    function viewPostingDetails(postingId) {
+      const posting = allPostings.find(p => p.id === postingId);
+      if (!posting) return;
+      
+      const modal = document.getElementById('detailModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalBody = document.getElementById('modalBody');
+      
+      modalTitle.textContent = 'Posting Details';
+      
+      const isActing = posting.remarks && 
+        (posting.remarks.toLowerCase().includes('acting') || 
+         posting.remarks.toLowerCase().includes('ag'));
+      
+      let html = `
+        <div style="margin-bottom: 20px;">
+          <h3 style="color: #2c3e50; margin-bottom: 15px;">
+            ${posting.name}
+            ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+          </h3>
+          ${posting.name !== posting.normalizedName ? `<p style="color: #666; font-style: italic;">Normalized: ${posting.normalizedName}</p>` : ''}
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div>
+              <strong>Rank:</strong> ${posting.rank || 'N/A'}
+              ${isEngineerRank(posting.rank) ? ' 👷' : ''}
+              ${isDirectorRank(posting.rank) ? ' 👔' : ''}
+            </div>
+            <div>
+              <strong>Notice ID:</strong> ${posting.noticeId}
+            </div>
+            <div>
+              <strong>Notice Type:</strong> ${posting.noticeType}
+            </div>
+            <div>
+              <strong>Date:</strong> ${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}
+            </div>
+            <div style="grid-column: span 2;">
+              <strong>From:</strong> ${posting.from || 'N/A'}
+            </div>
+            <div style="grid-column: span 2;">
+              <strong>To:</strong> ${posting.to || 'N/A'}
+            </div>
+            ${posting.remarks ? `
+            <div style="grid-column: span 2;">
+              <strong>Remarks:</strong> ${posting.remarks}
+            </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+      
+      // Check for promotion
+      const promotions = detectPromotions();
+      const isPromotion = promotions.find(p => p.posting.id === postingId);
+      if (isPromotion) {
+        html += `
+          <div style="background: ${isPromotion.isActing ? '#fff4e6' : '#d4edda'}; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong style="color: ${isPromotion.isActing ? '#856404' : '#155724'};">
+              ${isPromotion.isActing ? '📋 This is an acting appointment!' : '🎉 This posting represents a promotion!'}
+            </strong><br>
+            ${isPromotion.fromRank} → ${isPromotion.toRank}
+          </div>
+        `;
+      }
+      
+      // Find related postings
+      const relatedByPerson = allPostings.filter(p => 
+        p.id !== postingId && p.normalizedName === posting.normalizedName
+      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      // Find postings on same date
+      const sameDate = allPostings.filter(p => 
+        p.id !== postingId && p.dateFrom === posting.dateFrom
+      ).sort((a, b) => a.name.localeCompare(b.name));
+      
+      const relatedByPosition = allPostings.filter(p => 
+        p.id !== postingId && (
+          (posting.from && (p.from === posting.from || p.to === posting.from)) ||
+          (posting.to && (p.from === posting.to || p.to === posting.to))
+        )
+      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+      
+      if (sameDate.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Other Postings on ${posting.dateFrom}</h3>
+        `;
+        sameDate.slice(0, 10).forEach(related => {
+          const relatedIsActing = related.remarks && 
+            (related.remarks.toLowerCase().includes('acting') || 
+             related.remarks.toLowerCase().includes('ag'));
+          
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.name} (${related.rank || 'N/A'})
+                ${relatedIsActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
+                ${related.noticeId} (${related.noticeType})
+              </div>
+            </div>
+          `;
+        });
+        if (sameDate.length > 10) {
+          html += `<p style="text-align: center; color: #666; margin-top: 10px;">...and ${sameDate.length - 10} more</p>`;
+        }
+        html += '</div>';
+      }
+      
+      if (relatedByPerson.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Other Postings for ${posting.name}</h3>
+        `;
+        relatedByPerson.forEach(related => {
+          const relatedIsActing = related.remarks && 
+            (related.remarks.toLowerCase().includes('acting') || 
+             related.remarks.toLowerCase().includes('ag'));
+          
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'}
+                ${relatedIsActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'} • 
+                ${related.noticeId} (${related.noticeType})
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      if (relatedByPosition.length > 0) {
+        html += `
+          <div class="related-section">
+            <h3>Related Position Movements</h3>
+        `;
+        relatedByPosition.slice(0, 10).forEach(related => {
+          const isRelatedToFrom = posting.from && (related.from === posting.from || related.to === posting.from);
+          const isRelatedToTo = posting.to && (related.from === posting.to || related.to === posting.to);
+          const relatedIsActing = related.remarks && 
+            (related.remarks.toLowerCase().includes('acting') || 
+             related.remarks.toLowerCase().includes('ag'));
+          
+          html += `
+            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
+              <div style="font-weight: 600; margin-bottom: 5px;">
+                ${related.name} (${related.rank || 'N/A'})
+                ${relatedIsActing ? '<span class="acting-badge">ACTING</span>' : ''}
+              </div>
+              <div style="font-size: 14px; color: #666;">
+                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
+                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'}
+              </div>
+              <div style="font-size: 12px; color: #999; margin-top: 3px;">
+                ${isRelatedToFrom ? `Related to: ${posting.from}` : ''}
+                ${isRelatedToTo ? `Related to: ${posting.to}` : ''}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+      }
+      
+      modalBody.innerHTML = html;
+      modal.style.display = 'block';
+    }
+
+    // Upload to Firestore with duplicate check
+    async function uploadToFirestore() {
+      if (!currentUser) {
+        alert('Please login first');
+        return;
+      }
+      
+      const input = document.getElementById('jsonInput').value;
+      const status = document.getElementById('uploadStatus');
+      
+      if (!input.trim()) {
+        showStatus(status, 'error', '❌ Please enter JSON data');
+        return;
+      }
+
+      status.innerHTML = '<span class="loader"></span> Uploading...';
+      status.className = 'status info';
+
+      try {
+        const data = JSON.parse(input);
+        if (!Array.isArray(data)) {
+          throw new Error('Data must be a JSON array');
+        }
+
+        const existingNoticeIds = new Set(allPostings.map(p => p.noticeId).filter(id => id));
+
+        const newEntries = [];
+        const duplicates = [];
+
+        data.forEach(entry => {
+          // Add normalized name
+          entry.normalizedName = normalizeName(entry.name);
+          
+          if (entry.noticeId && existingNoticeIds.has(entry.noticeId)) {
+            duplicates.push(entry.noticeId);
+          } else {
+            newEntries.push(entry);
+          }
+        });
+
+        if (newEntries.length === 0) {
+          showStatus(status, 'error', `❌ All ${data.length} entries are duplicates and were not uploaded.`);
+          return;
+        }
+
+        const batch = db.batch();
+        const coll = db.collection('postings');
+
+        newEntries.forEach(entry => {
+          const docRef = coll.doc();
+          batch.set(docRef, {
+            ...entry,
+            uploadedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            uploadedBy: currentUser.email
+          });
+        });
+
+        await batch.commit();
+
+        let message = `✅ Successfully uploaded ${newEntries.length} new entries.`;
+        if (duplicates.length > 0) {
+          message += ` Skipped ${duplicates.length} duplicate entries: ${duplicates.join(', ')}`;
+        }
+        
+        showStatus(status, 'success', message);
+        document.getElementById('jsonInput').value = '';
+        
+        await loadAllData();
+        updateStatistics();
+        populateFilters();
+        loadEngineersSection();
+
+      } catch (err) {
+        showStatus(status, 'error', `❌ Error: ${err.message}`);
+      }
+    }
+
+    // Delete posting
+    async function deletePosting(id) {
+      if (!currentUser) {
+        alert('Please login first');
+        return;
+      }
+      
+      if (!confirm('Are you sure you want to delete this posting?')) return;
+
+      try {
+        await db.collection('postings').doc(id).delete();
+        
+        await loadAllData();
+        updateStatistics();
+        searchPostings();
+        
+        alert('Posting deleted successfully!');
+      } catch (error) {
+        alert('Error deleting posting: ' + error.message);
+      }
+    }
+
+    // Export results
+    function exportResults() {
+      const container = document.getElementById('results');
+      const dateGroups = container.querySelectorAll('.date-group');
+      
+      if (dateGroups.length === 0) {
+        alert('No data to export. Please perform a search first.');
+        return;
+      }
+
+      let csv = 'Date From,Name,Normalized Name,Rank,From,To,Date To,Notice ID,Notice Type,Remarks,Acting\n';
+      
+      dateGroups.forEach(group => {
+        const date = group.querySelector('.date-header h3').textContent;
+        const rows = group.querySelectorAll('tbody tr');
+        
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          const nameCell = cells[0].textContent.split('\n');
+          const name = nameCell[0].replace('ACTING', '').trim();
+          const normalizedName = nameCell[nameCell.length - 1].includes('(') ? 
+            nameCell[nameCell.length - 1].replace(/[()]/g, '').trim() : name;
+          const noticeText = cells[5].textContent.split('\n');
+          const remarks = cells[6].textContent;
+          const isActing = nameCell[0].includes('ACTING') || 
+            (remarks && (remarks.toLowerCase().includes('acting') || remarks.toLowerCase().includes('ag')));
+          
+          csv += `"${date}","${name}","${normalizedName}","${cells[1].textContent}","${cells[2].textContent}","${cells[3].textContent}","${cells[4].textContent}","${noticeText[0]}","${noticeText[1]}","${remarks}","${isActing ? 'Yes' : 'No'}"\n`;
+        });
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `posting_notices_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // Download JSON template
+    function downloadTemplate() {
+      const template = [{
+        name: "John Doe",
+        rank: "Captain",
+        from: "Unit A",
+        to: "Unit B",
+        dateFrom: "2024-01-01",
+        dateTo: "2024-12-31",
+        noticeId: "PN-2024-001",
+        noticeType: "AA&PN",
+        remarks: "Transfer for operational requirements"
+      }];
+      
+      const blob = new Blob([JSON.stringify(template, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'posting_template.json';
+      a.click();
+    }
+
+    // Utility functions
+    function showStatus(element, type, message) {
+      element.textContent = message;
+      element.className = `status ${type}`;
+      setTimeout(() => {
+        element.className = 'status';
+      }, 5000);
+    }
+
+    function clearInput() {
+      document.getElementById('jsonInput').value = '';
+    }
+
+    function resetFilters() {
+      document.getElementById('searchName').value = '';
+      document.getElementById('searchRank').value = '';
+      document.getElementById('searchNoticeId').value = '';
+      document.getElementById('searchNoticeType').value = '';
+      document.getElementById('results').innerHTML = '';
+      document.getElementById('searchStatus').className = 'status';
+      // Reset engineer filter
+      engineerFilterActive = false;
+      document.getElementById('engineerToggle').classList.remove('active');
+    }
+
+    function closeModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('detailModal');
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    }
+  </script>
+
+</body>
+</html>
