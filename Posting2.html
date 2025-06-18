@@ -314,8 +314,8 @@
       background: #8e44ad;
     }
 
-    /* Current Positions Section */
-    .current-positions-section {
+    /* Personnel List Section */
+    .personnel-list-section {
       background: white;
       border-radius: 12px;
       padding: 25px;
@@ -323,86 +323,98 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
-    .department-grid {
+    .personnel-grid {
       display: grid;
-      gap: 20px;
+      gap: 10px;
       margin-top: 20px;
     }
 
-    .department-card {
-      background: #f8f9fa;
-      border-radius: 10px;
-      padding: 20px;
-      border: 2px solid #e9ecef;
-      transition: all 0.3s;
-    }
-
-    .department-card:hover {
-      border-color: #3498db;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .department-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #e9ecef;
-    }
-
-    .department-name {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #2c3e50;
-    }
-
-    .department-count {
-      background: #3498db;
-      color: white;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .personnel-list {
+    .person-row {
       display: grid;
-      gap: 10px;
-    }
-
-    .personnel-item {
-      display: flex;
-      justify-content: space-between;
+      grid-template-columns: 30px 1fr 60px 2fr 120px 100px;
+      gap: 15px;
       align-items: center;
-      padding: 10px;
-      background: white;
-      border-radius: 6px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
       border: 1px solid #e9ecef;
       cursor: pointer;
       transition: all 0.3s;
     }
 
-    .personnel-item:hover {
+    .person-row:hover {
+      background: #e9ecef;
       transform: translateX(5px);
       border-color: #3498db;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
-    .personnel-name {
+    .person-row.header {
+      background: #34495e;
+      color: white;
+      font-weight: 600;
+      cursor: default;
+      transform: none;
+    }
+
+    .person-row.header:hover {
+      background: #34495e;
+      transform: none;
+    }
+
+    .person-number {
+      text-align: center;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .person-name {
       font-weight: 600;
       color: #2c3e50;
     }
 
-    .personnel-rank {
-      font-size: 14px;
-      color: #666;
-      margin-left: 10px;
+    .person-gender {
+      text-align: center;
+      font-size: 20px;
     }
 
-    .personnel-date {
-      font-size: 12px;
+    .person-position {
+      color: #666;
+    }
+
+    .person-rank {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .person-since {
+      text-align: right;
+      font-size: 14px;
       color: #999;
+    }
+
+    /* Gender Indicators */
+    .gender-male {
+      color: #3498db;
+    }
+
+    .gender-female {
+      color: #e91e63;
+    }
+
+    .gender-unknown {
+      color: #999;
+    }
+
+    /* HyD Badge */
+    .hyd-badge {
+      background: #e74c3c;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 8px;
     }
 
     /* Acting Badge */
@@ -509,6 +521,14 @@
       background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
     }
 
+    .stat-card.pink {
+      background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    }
+
+    .stat-card.blue {
+      background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    }
+
     .stat-card h3 {
       font-size: 2rem;
       margin-bottom: 5px;
@@ -519,42 +539,113 @@
       font-size: 0.9rem;
     }
 
-    /* Date Grouping Styles */
-    .date-group {
-      margin-bottom: 30px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      overflow: hidden;
+    /* Department Grid */
+    .department-grid {
+      display: grid;
+      gap: 20px;
+      margin-top: 20px;
     }
 
-    .date-header {
-      background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
-      color: white;
-      padding: 15px 20px;
+    .department-card {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s;
+    }
+
+    .department-card:hover {
+      border-color: #3498db;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .department-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      cursor: pointer;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e9ecef;
     }
 
-    .date-header:hover {
-      background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+    .department-name {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2c3e50;
     }
 
-    .date-header h3 {
-      margin: 0;
-      font-size: 1.1rem;
-    }
-
-    .date-badge {
-      background: rgba(255,255,255,0.2);
+    .department-count {
+      background: #3498db;
+      color: white;
       padding: 5px 15px;
       border-radius: 20px;
       font-size: 14px;
+      font-weight: 600;
     }
 
-    .date-content {
-      padding: 20px;
+    /* Timeline Styles */
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      bottom: -30px;
+      width: 2px;
+      background: #e0e0e0;
+    }
+
+    .timeline-item:last-child::before {
+      display: none;
+    }
+
+    .timeline-marker {
+      width: 40px;
+      height: 40px;
+      background: #3498db;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-content {
+      flex: 1;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+    }
+
+    .timeline-date {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .timeline-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+
+    .timeline-details {
+      font-size: 14px;
+      color: #666;
     }
 
     /* Promotion Timeline */
@@ -630,333 +721,7 @@
       color: #666;
     }
 
-    /* Analysis Charts */
-    .chart-container {
-      margin-top: 20px;
-    }
-
-    .chart-bar {
-      display: flex;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .chart-label {
-      width: 150px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #666;
-    }
-
-    .chart-value {
-      margin-left: auto;
-      font-size: 14px;
-      font-weight: 600;
-      color: #2c3e50;
-      margin-right: 10px;
-    }
-
-    .bar-wrapper {
-      flex: 1;
-      height: 30px;
-      background: #e0e0e0;
-      border-radius: 15px;
-      overflow: hidden;
-      margin: 0 15px;
-    }
-
-    .bar-fill {
-      height: 100%;
-      background: linear-gradient(to right, #3498db, #2980b9);
-      border-radius: 15px;
-      transition: width 0.6s ease;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 10px;
-      color: white;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    /* Engineers Section */
-    .engineers-section {
-      background: white;
-      border-radius: 12px;
-      margin-top: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      overflow: hidden;
-    }
-
-    .engineers-header {
-      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-      color: white;
-      padding: 20px 25px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      transition: all 0.3s;
-    }
-
-    .engineers-header:hover {
-      background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%);
-    }
-
-    .engineers-header h2 {
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .toggle-icon {
-      font-size: 24px;
-      transition: transform 0.3s;
-    }
-
-    .toggle-icon.open {
-      transform: rotate(180deg);
-    }
-
-    .engineers-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.5s ease;
-    }
-
-    .engineers-content.open {
-      max-height: 3000px;
-    }
-
-    .engineers-inner {
-      padding: 25px;
-    }
-
-    .engineer-filters {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    .engineer-rank-tab {
-      padding: 8px 16px;
-      background: #f0f0f0;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .engineer-rank-tab.active {
-      background: #9b59b6;
-      color: white;
-    }
-
-    .engineers-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 15px;
-    }
-
-    .engineer-card {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #9b59b6;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .engineer-card:hover {
-      background: #e9ecef;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    .engineer-name {
-      font-weight: 600;
-      color: #2c3e50;
-      margin-bottom: 5px;
-    }
-
-    .engineer-details {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.5;
-    }
-
-    .normalized-name {
-      font-size: 12px;
-      color: #999;
-      font-style: italic;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th {
-      background: #34495e;
-      color: white;
-      padding: 12px;
-      text-align: left;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    td {
-      padding: 12px;
-      border-bottom: 1px solid #e0e0e0;
-      font-size: 14px;
-    }
-
-    tr {
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    tr:hover {
-      background: #f8f9fa;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .clickable-name {
-      color: #3498db;
-      font-weight: 600;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .clickable-name:hover {
-      color: #2980b9;
-    }
-
-    .timeline {
-      position: relative;
-      padding: 20px 0;
-    }
-
-    .timeline-item {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 30px;
-      position: relative;
-    }
-
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: 19px;
-      top: 40px;
-      bottom: -30px;
-      width: 2px;
-      background: #e0e0e0;
-    }
-
-    .timeline-item:last-child::before {
-      display: none;
-    }
-
-    .timeline-marker {
-      width: 40px;
-      height: 40px;
-      background: #3498db;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: bold;
-      flex-shrink: 0;
-      z-index: 1;
-    }
-
-    .timeline-content {
-      flex: 1;
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      border-left: 4px solid #3498db;
-    }
-
-    .timeline-date {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 5px;
-    }
-
-    .timeline-title {
-      font-weight: 600;
-      margin-bottom: 5px;
-    }
-
-    .timeline-details {
-      font-size: 14px;
-      color: #666;
-    }
-
-    .related-section {
-      margin-top: 30px;
-      padding-top: 20px;
-      border-top: 2px solid #e0e0e0;
-    }
-
-    .related-section h3 {
-      color: #2c3e50;
-      margin-bottom: 15px;
-      font-size: 1.2rem;
-    }
-
-    .related-item {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border-left: 4px solid transparent;
-    }
-
-    .related-item:hover {
-      background: #e9ecef;
-      transform: translateX(5px);
-      border-left-color: #3498db;
-    }
-
-    .person-card {
-      background: #f8f9fa;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .person-card:hover {
-      background: #e9ecef;
-      transform: translateX(5px);
-    }
-
-    .person-name {
-      font-weight: 600;
-      color: #2c3e50;
-    }
-
-    .person-info {
-      font-size: 14px;
-      color: #666;
-      margin-top: 5px;
-    }
-
+    /* Modal Styles */
     .modal {
       display: none;
       position: fixed;
@@ -1101,8 +866,16 @@
         top: 0;
       }
       
-      .engineers-grid {
-        grid-template-columns: 1fr;
+      .person-row {
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+      }
+      
+      .person-row .person-gender,
+      .person-row .person-position,
+      .person-row .person-rank,
+      .person-row .person-since {
+        display: none;
       }
     }
   </style>
@@ -1152,16 +925,56 @@
       <!-- Advanced Search Section -->
       <div class="search-section">
         <div class="search-tabs">
-          <button class="tab-button active" onclick="switchTab('current')">Current Positions</button>
-          <button class="tab-button" onclick="switchTab('general')">General Search</button>
-          <button class="tab-button" onclick="switchTab('person')">Person History</button>
-          <button class="tab-button" onclick="switchTab('position')">Position History</button>
+          <button class="tab-button active" onclick="switchTab('personnel')">Personnel List</button>
+          <button class="tab-button" onclick="switchTab('current')">Current Positions</button>
+          <button class="tab-button" onclick="switchTab('search')">Search Postings</button>
           <button class="tab-button" onclick="switchTab('promotions')">Promotions</button>
           <button class="tab-button" onclick="switchTab('analysis')">Data Analysis</button>
         </div>
 
+        <!-- Personnel List Tab -->
+        <div id="personnelTab" class="tab-content active">
+          <div class="toggle-container">
+            <div class="toggle-switch" id="engineerTogglePersonnel" onclick="togglePersonnelFilter()">
+              <div class="toggle-slider"></div>
+            </div>
+            <span class="toggle-label">Show Engineers/Directors Only (CE/SE/E/AE/AD/DD/D)</span>
+          </div>
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label>Search Name</label>
+              <input type="text" id="personnelSearchName" placeholder="Enter name..." onkeyup="filterPersonnelList()">
+            </div>
+            <div class="filter-group">
+              <label>Department/Unit</label>
+              <input type="text" id="personnelDepartment" placeholder="Enter department..." onkeyup="filterPersonnelList()">
+            </div>
+            <div class="filter-group">
+              <label>Rank Filter</label>
+              <select id="personnelRankFilter" onchange="filterPersonnelList()">
+                <option value="">All Ranks</option>
+                <option value="engineer">Engineers Only</option>
+                <option value="director">Directors Only</option>
+                <option value="both">Engineers & Directors</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label>Gender</label>
+              <select id="personnelGenderFilter" onchange="filterPersonnelList()">
+                <option value="">All</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+              </select>
+            </div>
+          </div>
+          <div class="button-group">
+            <button onclick="viewPersonnelList()">👥 View Personnel List</button>
+            <button class="btn-success" onclick="exportPersonnelList()">📥 Export List</button>
+          </div>
+        </div>
+
         <!-- Current Positions Tab -->
-        <div id="currentTab" class="tab-content active">
+        <div id="currentTab" class="tab-content">
           <div class="toggle-container">
             <div class="toggle-switch" id="engineerToggleMain" onclick="toggleMainEngineerFilter()">
               <div class="toggle-slider"></div>
@@ -1189,8 +1002,8 @@
           </div>
         </div>
 
-        <!-- General Search Tab -->
-        <div id="generalTab" class="tab-content">
+        <!-- Search Postings Tab -->
+        <div id="searchTab" class="tab-content">
           <div class="toggle-container">
             <div class="toggle-switch" id="engineerToggle" onclick="toggleEngineerFilter()">
               <div class="toggle-slider"></div>
@@ -1209,58 +1022,18 @@
               </select>
             </div>
             <div class="filter-group">
-              <label>Notice ID</label>
-              <input type="text" id="searchNoticeId" placeholder="Enter notice ID...">
+              <label>From Date</label>
+              <input type="date" id="searchDateFrom">
             </div>
             <div class="filter-group">
-              <label>Notice Type</label>
-              <select id="searchNoticeType">
-                <option value="">All Types</option>
-                <option value="AA&PN">AA&PN</option>
-                <option value="U-PN">U-PN</option>
-                <option value="CEDD-PN">CEDD-PN</option>
-              </select>
+              <label>To Date</label>
+              <input type="date" id="searchDateTo">
             </div>
           </div>
           <div class="button-group">
             <button onclick="searchPostings()">🔍 Search</button>
             <button class="btn-secondary" onclick="resetFilters()">↻ Reset</button>
             <button class="btn-success" onclick="exportResults()">📥 Export</button>
-          </div>
-        </div>
-
-        <!-- Person History Tab -->
-        <div id="personTab" class="tab-content">
-          <div class="filter-grid">
-            <div class="filter-group" style="grid-column: span 2;">
-              <label>Select Person</label>
-              <input type="text" id="personSearch" placeholder="Type to search person..." onkeyup="searchPerson()">
-            </div>
-          </div>
-          <div id="personSuggestions"></div>
-          <div class="button-group">
-            <button onclick="viewPersonHistory()">📊 View History</button>
-          </div>
-        </div>
-
-        <!-- Position History Tab -->
-        <div id="positionTab" class="tab-content">
-          <div class="filter-grid">
-            <div class="filter-group">
-              <label>Unit/Position</label>
-              <input type="text" id="positionSearch" placeholder="Enter unit or position...">
-            </div>
-            <div class="filter-group">
-              <label>Search In</label>
-              <select id="positionField">
-                <option value="from">From Field</option>
-                <option value="to">To Field</option>
-                <option value="both">Both</option>
-              </select>
-            </div>
-          </div>
-          <div class="button-group">
-            <button onclick="viewPositionHistory()">📊 View Position History</button>
           </div>
         </div>
 
@@ -1295,7 +1068,7 @@
           <div class="button-group">
             <button onclick="analyzeData()">📊 Analyze Data</button>
             <button class="btn-purple" onclick="analyzePromotions()">⬆️ Promotion Analysis</button>
-            <button class="btn-success" onclick="analyzeTrends()">📈 Trend Analysis</button>
+            <button class="btn-success" onclick="analyzeGender()">👥 Gender Analysis</button>
           </div>
           <div id="analysisResults"></div>
         </div>
@@ -1319,25 +1092,31 @@
           <h3 id="directorCount">0</h3>
           <p>Directors</p>
         </div>
-        <div class="stat-card green">
-          <h3 id="currentPositionsCount">0</h3>
-          <p>Current Positions</p>
+        <div class="stat-card blue">
+          <h3 id="maleCount">0</h3>
+          <p>Male Personnel</p>
         </div>
-        <div class="stat-card">
-          <h3 id="actingCount">0</h3>
-          <p>Acting Appointments</p>
+        <div class="stat-card pink">
+          <h3 id="femaleCount">0</h3>
+          <p>Female Personnel</p>
         </div>
       </div>
 
+      <!-- Personnel List Section -->
+      <div id="personnelListSection" class="personnel-list-section" style="display: none;">
+        <h2>👥 Personnel List</h2>
+        <div id="personnelListContent"></div>
+      </div>
+
       <!-- Current Positions Section -->
-      <div id="currentPositionsSection" class="current-positions-section" style="display: none;">
+      <div id="currentPositionsSection" class="card" style="display: none;">
         <h2>📍 Current Positions by Department</h2>
         <div id="currentPositionsContent"></div>
       </div>
 
       <!-- Results Section -->
       <div class="card">
-        <h2>📊 Search Results</h2>
+        <h2>📊 Results</h2>
         <div id="searchStatus" class="status"></div>
         <div id="results"></div>
       </div>
@@ -1365,21 +1144,6 @@
           <button class="btn-secondary" onclick="downloadTemplate()">📄 Download Template</button>
         </div>
         <div id="uploadStatus" class="status"></div>
-      </div>
-
-      <!-- Engineers Section -->
-      <div class="engineers-section">
-        <div class="engineers-header" onclick="toggleEngineersSection()">
-          <h2>👷 Engineering & Director Personnel Directory</h2>
-          <span class="toggle-icon" id="engineersToggle">▼</span>
-        </div>
-        <div class="engineers-content" id="engineersContent">
-          <div class="engineers-inner">
-            <div class="engineer-filters" id="engineerFilters"></div>
-            <div id="engineersStats"></div>
-            <div id="engineersList"></div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -1419,6 +1183,8 @@
     let currentUser = null;
     let engineerFilterActive = false;
     let mainEngineerFilterActive = false;
+    let personnelFilterActive = false;
+    let uniquePersonnel = new Map(); // Store unique personnel with their details
     
     // Define engineer and director ranks
     const engineerRanks = ['Chief Engineer', 'Senior Engineer', 'Engineer', 'Assistant Engineer'];
@@ -1470,7 +1236,6 @@
       await loadAllData();
       updateStatistics();
       populateFilters();
-      loadEngineersSection();
     }
 
     // Normalize name (remove titles like Miss/Ms/Mr)
@@ -1487,6 +1252,25 @@
       });
       
       return normalized.trim();
+    }
+
+    // Detect gender from title
+    function detectGender(name) {
+      if (!name) return 'U'; // Unknown
+      
+      const lowerName = name.toLowerCase();
+      if (lowerName.startsWith('mr.') || lowerName.startsWith('mr ')) return 'M';
+      if (lowerName.startsWith('miss.') || lowerName.startsWith('miss ') || 
+          lowerName.startsWith('ms.') || lowerName.startsWith('ms ') || 
+          lowerName.startsWith('mrs.') || lowerName.startsWith('mrs ')) return 'F';
+      
+      return 'U'; // Unknown
+    }
+
+    // Check if is HyD
+    function isHyD(rank) {
+      if (!rank) return false;
+      return rank.toLowerCase().includes('hyd') || rank.toLowerCase().includes('head');
     }
 
     // Check if rank is engineer or director
@@ -1582,6 +1366,20 @@
       return false;
     }
 
+    // Toggle personnel filter
+    function togglePersonnelFilter() {
+      const toggle = document.getElementById('engineerTogglePersonnel');
+      personnelFilterActive = !personnelFilterActive;
+      
+      if (personnelFilterActive) {
+        toggle.classList.add('active');
+      } else {
+        toggle.classList.remove('active');
+      }
+      
+      filterPersonnelList();
+    }
+
     // Toggle main engineer filter
     function toggleMainEngineerFilter() {
       const toggle = document.getElementById('engineerToggleMain');
@@ -1617,11 +1415,13 @@
         allPeople.clear();
         allRanks.clear();
         allUnits.clear();
+        uniquePersonnel.clear();
         
         snapshot.forEach(doc => {
           const data = { id: doc.id, ...doc.data() };
-          // Add normalized name
+          // Add normalized name and gender
           data.normalizedName = normalizeName(data.name);
+          data.gender = detectGender(data.name);
           allPostings.push(data);
           
           if (data.name) allPeople.add(data.name);
@@ -1633,9 +1433,244 @@
         // Sort all postings by date
         allPostings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
         
+        // Build unique personnel map
+        buildUniquePersonnelMap();
+        
       } catch (error) {
         console.error("Error loading data:", error);
       }
+    }
+
+    // Build unique personnel map
+    function buildUniquePersonnelMap() {
+      uniquePersonnel.clear();
+      
+      allPostings.forEach(posting => {
+        const normalizedName = posting.normalizedName;
+        
+        if (!uniquePersonnel.has(normalizedName)) {
+          uniquePersonnel.set(normalizedName, {
+            displayName: posting.normalizedName, // Use normalized name for display
+            gender: posting.gender,
+            postings: []
+          });
+        }
+        
+        uniquePersonnel.get(normalizedName).postings.push(posting);
+      });
+      
+      // Sort postings for each person
+      uniquePersonnel.forEach(person => {
+        person.postings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
+        
+        // Get current position (most recent posting that's still active)
+        const today = new Date().toISOString().split('T')[0];
+        const currentPosting = person.postings.find(p => !p.dateTo || p.dateTo >= today);
+        
+        if (currentPosting) {
+          person.currentPosition = currentPosting.to;
+          person.currentRank = currentPosting.rank;
+          person.currentSince = currentPosting.dateFrom;
+          person.isActing = currentPosting.remarks && 
+            (currentPosting.remarks.toLowerCase().includes('acting') || 
+             currentPosting.remarks.toLowerCase().includes('ag'));
+          person.isHyD = isHyD(currentPosting.rank);
+        } else {
+          // If no current position, use the most recent posting
+          const lastPosting = person.postings[0];
+          person.lastPosition = lastPosting.to;
+          person.lastRank = lastPosting.rank;
+          person.lastDate = lastPosting.dateTo;
+        }
+      });
+    }
+
+    // View personnel list
+    function viewPersonnelList() {
+      const section = document.getElementById('personnelListSection');
+      const content = document.getElementById('personnelListContent');
+      
+      section.style.display = 'block';
+      filterPersonnelList();
+      
+      // Scroll to the section
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Filter personnel list
+    function filterPersonnelList() {
+      if (!document.getElementById('personnelListSection').style.display || 
+          document.getElementById('personnelListSection').style.display === 'none') {
+        return;
+      }
+      
+      const searchName = document.getElementById('personnelSearchName').value.toLowerCase();
+      const department = document.getElementById('personnelDepartment').value.toLowerCase();
+      const rankFilter = document.getElementById('personnelRankFilter').value;
+      const genderFilter = document.getElementById('personnelGenderFilter').value;
+      
+      let filteredPersonnel = Array.from(uniquePersonnel.entries());
+      
+      // Filter by name
+      if (searchName) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => 
+          person.displayName.toLowerCase().includes(searchName)
+        );
+      }
+      
+      // Filter by department
+      if (department) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => 
+          person.currentPosition && person.currentPosition.toLowerCase().includes(department)
+        );
+      }
+      
+      // Filter by rank type
+      if (personnelFilterActive || rankFilter) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => {
+          const rank = person.currentRank || person.lastRank;
+          if (personnelFilterActive || rankFilter === 'both') {
+            return isEngineerOrDirectorRank(rank);
+          } else if (rankFilter === 'engineer') {
+            return isEngineerRank(rank);
+          } else if (rankFilter === 'director') {
+            return isDirectorRank(rank);
+          }
+          return true;
+        });
+      }
+      
+      // Filter by gender
+      if (genderFilter) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => 
+          person.gender === genderFilter
+        );
+      }
+      
+      // Sort by name
+      filteredPersonnel.sort((a, b) => a[1].displayName.localeCompare(b[1].displayName));
+      
+      renderPersonnelList(filteredPersonnel);
+    }
+
+    // Render personnel list
+    function renderPersonnelList(personnel) {
+      const content = document.getElementById('personnelListContent');
+      
+      if (personnel.length === 0) {
+        content.innerHTML = '<p class="no-results">No personnel found with the selected filters.</p>';
+        return;
+      }
+      
+      let html = '<div class="personnel-grid">';
+      
+      // Header row
+      html += `
+        <div class="person-row header">
+          <div class="person-number">#</div>
+          <div class="person-name">Name</div>
+          <div class="person-gender">Gender</div>
+          <div class="person-position">Current Position</div>
+          <div class="person-rank">Rank</div>
+          <div class="person-since">Since</div>
+        </div>
+      `;
+      
+      personnel.forEach(([normalizedName, person], index) => {
+        const genderIcon = person.gender === 'M' ? '♂️' : person.gender === 'F' ? '♀️' : '❓';
+        const genderClass = person.gender === 'M' ? 'gender-male' : person.gender === 'F' ? 'gender-female' : 'gender-unknown';
+        
+        const position = person.currentPosition || person.lastPosition || 'N/A';
+        const rank = person.currentRank || person.lastRank || 'N/A';
+        const since = person.currentSince || person.lastDate || 'N/A';
+        const status = person.currentPosition ? 'Current' : 'Former';
+        
+        html += `
+          <div class="person-row" onclick="viewPersonHistory('${person.displayName}')">
+            <div class="person-number">${index + 1}</div>
+            <div class="person-name">
+              ${person.displayName}
+              ${person.isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+            </div>
+            <div class="person-gender ${genderClass}">${genderIcon}</div>
+            <div class="person-position">
+              ${position}
+              ${person.isHyD ? '<span class="hyd-badge">HyD</span>' : ''}
+            </div>
+            <div class="person-rank">${rank}</div>
+            <div class="person-since">${status}: ${since}</div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      html += `<p style="margin-top: 20px; text-align: center; color: #666;">Total: ${personnel.length} personnel</p>`;
+      
+      content.innerHTML = html;
+    }
+
+    // Export personnel list
+    function exportPersonnelList() {
+      const searchName = document.getElementById('personnelSearchName').value.toLowerCase();
+      const department = document.getElementById('personnelDepartment').value.toLowerCase();
+      const rankFilter = document.getElementById('personnelRankFilter').value;
+      const genderFilter = document.getElementById('personnelGenderFilter').value;
+      
+      let filteredPersonnel = Array.from(uniquePersonnel.entries());
+      
+      // Apply same filters as display
+      if (searchName) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => 
+          person.displayName.toLowerCase().includes(searchName)
+        );
+      }
+      
+      if (department) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => 
+          person.currentPosition && person.currentPosition.toLowerCase().includes(department)
+        );
+      }
+      
+      if (personnelFilterActive || rankFilter) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => {
+          const rank = person.currentRank || person.lastRank;
+          if (personnelFilterActive || rankFilter === 'both') {
+            return isEngineerOrDirectorRank(rank);
+          } else if (rankFilter === 'engineer') {
+            return isEngineerRank(rank);
+          } else if (rankFilter === 'director') {
+            return isDirectorRank(rank);
+          }
+          return true;
+        });
+      }
+      
+      if (genderFilter) {
+        filteredPersonnel = filteredPersonnel.filter(([name, person]) => 
+          person.gender === genderFilter
+        );
+      }
+      
+      filteredPersonnel.sort((a, b) => a[1].displayName.localeCompare(b[1].displayName));
+      
+      let csv = 'No,Name,Gender,Current Position,Rank,Status,Since/Until,Acting,HyD\n';
+      
+      filteredPersonnel.forEach(([normalizedName, person], index) => {
+        const position = person.currentPosition || person.lastPosition || 'N/A';
+        const rank = person.currentRank || person.lastRank || 'N/A';
+        const since = person.currentSince || person.lastDate || 'N/A';
+        const status = person.currentPosition ? 'Current' : 'Former';
+        const gender = person.gender === 'M' ? 'Male' : person.gender === 'F' ? 'Female' : 'Unknown';
+        
+        csv += `${index + 1},"${person.displayName}","${gender}","${position}","${rank}","${status}","${since}","${person.isActing ? 'Yes' : 'No'}","${person.isHyD ? 'Yes' : 'No'}"\n`;
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `personnel_list_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
     }
 
     // Get current positions
@@ -1674,7 +1709,10 @@
           
           currentPositions[posting.to].push({
             ...posting,
-            isActing: isActing
+            displayName: posting.normalizedName,
+            isActing: isActing,
+            isHyD: isHyD(posting.rank),
+            gender: posting.gender
           });
         }
       });
@@ -1733,7 +1771,7 @@
           const bIndex = rankOrder.findIndex(r => b.rank && b.rank.includes(r));
           
           if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-          return a.name.localeCompare(b.name);
+          return a.displayName.localeCompare(b.displayName);
         });
         
         html += `
@@ -1746,14 +1784,17 @@
         `;
         
         personnel.forEach(person => {
+          const genderIcon = person.gender === 'M' ? '♂️' : person.gender === 'F' ? '♀️' : '';
+          
           html += `
-            <div class="personnel-item" onclick="viewPostingDetails('${person.id}')">
+            <div class="person-row" onclick="viewPersonHistory('${person.displayName}')" style="grid-template-columns: 1fr 100px;">
               <div>
-                <span class="personnel-name">${person.name}</span>
+                ${genderIcon} <span class="person-name">${person.displayName}</span>
                 <span class="personnel-rank">${person.rank || 'N/A'}</span>
                 ${person.isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+                ${person.isHyD ? '<span class="hyd-badge">HyD</span>' : ''}
               </div>
-              <div class="personnel-date">Since ${person.dateFrom || 'N/A'}</div>
+              <div class="person-since">Since ${person.dateFrom || 'N/A'}</div>
             </div>
           `;
         });
@@ -1781,12 +1822,14 @@
     function exportCurrentPositions() {
       const currentPositions = getCurrentPositions();
       
-      let csv = 'Department,Name,Rank,Position Type,Start Date,Remarks\n';
+      let csv = 'Department,Name,Gender,Rank,Position Type,Start Date,HyD,Remarks\n';
       
       Object.entries(currentPositions).sort(([a], [b]) => a.localeCompare(b)).forEach(([dept, personnel]) => {
         personnel.forEach(person => {
           const positionType = person.isActing ? 'Acting' : 'Substantive';
-          csv += `"${dept}","${person.name}","${person.rank || 'N/A'}","${positionType}","${person.dateFrom || 'N/A'}","${person.remarks || ''}"\n`;
+          const gender = person.gender === 'M' ? 'Male' : person.gender === 'F' ? 'Female' : 'Unknown';
+          const hydStatus = person.isHyD ? 'Yes' : 'No';
+          csv += `"${dept}","${person.displayName}","${gender}","${person.rank || 'N/A'}","${positionType}","${person.dateFrom || 'N/A'}","${hydStatus}","${person.remarks || ''}"\n`;
         });
       });
       
@@ -1801,48 +1844,34 @@
     // Update statistics
     function updateStatistics() {
       document.getElementById('totalCount').textContent = allPostings.length;
-      document.getElementById('peopleCount').textContent = allPeople.size;
+      document.getElementById('peopleCount').textContent = uniquePersonnel.size;
       
       // Count engineers
-      const engineers = allPostings.filter(p => isEngineerRank(p.rank));
-      const uniqueEngineers = new Set(engineers.map(e => e.normalizedName));
-      document.getElementById('engineerCount').textContent = uniqueEngineers.size;
+      let engineerCount = 0;
+      let directorCount = 0;
+      let maleCount = 0;
+      let femaleCount = 0;
       
-      // Count directors
-      const directors = allPostings.filter(p => isDirectorRank(p.rank));
-      const uniqueDirectors = new Set(directors.map(d => d.normalizedName));
-      document.getElementById('directorCount').textContent = uniqueDirectors.size;
+      uniquePersonnel.forEach(person => {
+        const currentRank = person.currentRank || person.lastRank;
+        if (isEngineerRank(currentRank)) engineerCount++;
+        if (isDirectorRank(currentRank)) directorCount++;
+        if (person.gender === 'M') maleCount++;
+        if (person.gender === 'F') femaleCount++;
+      });
       
-      // Count current positions
-      const currentPositions = getCurrentPositions();
-      const totalCurrentPositions = Object.values(currentPositions).reduce((sum, dept) => sum + dept.length, 0);
-      document.getElementById('currentPositionsCount').textContent = totalCurrentPositions;
-      
-      // Count acting appointments
-      const actingAppointments = allPostings.filter(p => 
-        p.remarks && (p.remarks.toLowerCase().includes('acting') || p.remarks.toLowerCase().includes('ag'))
-      );
-      const uniqueActing = new Set(actingAppointments.map(a => a.normalizedName));
-      document.getElementById('actingCount').textContent = uniqueActing.size;
+      document.getElementById('engineerCount').textContent = engineerCount;
+      document.getElementById('directorCount').textContent = directorCount;
+      document.getElementById('maleCount').textContent = maleCount;
+      document.getElementById('femaleCount').textContent = femaleCount;
     }
 
     // Detect promotions
     function detectPromotions() {
       const promotions = [];
-      const peoplePostings = {};
       
-      // Group postings by normalized name
-      allPostings.forEach(posting => {
-        const normalizedName = posting.normalizedName;
-        if (!peoplePostings[normalizedName]) {
-          peoplePostings[normalizedName] = [];
-        }
-        peoplePostings[normalizedName].push(posting);
-      });
-      
-      // Check for promotions
-      Object.entries(peoplePostings).forEach(([normalizedName, postings]) => {
-        postings.sort((a, b) => (a.dateFrom || '').localeCompare(b.dateFrom || ''));
+      uniquePersonnel.forEach((person, normalizedName) => {
+        const postings = person.postings;
         
         for (let i = 1; i < postings.length; i++) {
           const prevRank = postings[i-1].rank;
@@ -1855,13 +1884,14 @@
                postings[i].remarks.toLowerCase().includes('ag'));
             
             promotions.push({
-              name: postings[i].name,
+              name: person.displayName,
               normalizedName: normalizedName,
               fromRank: prevRank,
               toRank: currRank,
               date: postings[i].dateFrom,
               posting: postings[i],
-              isActing: isActing
+              isActing: isActing,
+              gender: person.gender
             });
           }
         }
@@ -1943,15 +1973,17 @@
       html += '<div class="promotion-timeline">';
       
       promotions.forEach((promo, index) => {
+        const genderIcon = promo.gender === 'M' ? '♂️' : promo.gender === 'F' ? '♀️' : '';
+        
         html += `
           <div class="promotion-item">
             <div class="promotion-marker">
               ${promo.isActing ? 'AG' : '⬆'}
             </div>
-            <div class="promotion-content" onclick="viewPostingDetails('${promo.posting.id}')">
+            <div class="promotion-content" onclick="viewPersonHistory('${promo.name}')">
               <div class="promotion-date">${promo.date || 'N/A'}</div>
               <div class="promotion-title">
-                ${promo.name}
+                ${genderIcon} ${promo.name}
                 ${promo.isActing ? '<span class="acting-badge">ACTING</span>' : ''}
               </div>
               <div class="promotion-details">
@@ -2000,11 +2032,12 @@
       
       promotions.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       
-      let csv = 'Date,Name,Promotion Type,From Rank,To Rank,New Position,Notice ID,Remarks\n';
+      let csv = 'Date,Name,Gender,Promotion Type,From Rank,To Rank,New Position,Notice ID,Remarks\n';
       
       promotions.forEach(promo => {
         const type = promo.isActing ? 'Acting' : 'Substantive';
-        csv += `"${promo.date || 'N/A'}","${promo.name}","${type}","${promo.fromRank}","${promo.toRank}","${promo.posting.to || 'N/A'}","${promo.posting.noticeId || 'N/A'}","${promo.posting.remarks || ''}"\n`;
+        const gender = promo.gender === 'M' ? 'Male' : promo.gender === 'F' ? 'Female' : 'Unknown';
+        csv += `"${promo.date || 'N/A'}","${promo.name}","${gender}","${type}","${promo.fromRank}","${promo.toRank}","${promo.posting.to || 'N/A'}","${promo.posting.noticeId || 'N/A'}","${promo.posting.remarks || ''}"\n`;
       });
       
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -2036,7 +2069,10 @@
       });
       document.getElementById(tabName + 'Tab').classList.add('active');
       
-      // Hide current positions section when switching tabs
+      // Hide sections when switching tabs
+      if (tabName !== 'personnel') {
+        document.getElementById('personnelListSection').style.display = 'none';
+      }
       if (tabName !== 'current') {
         document.getElementById('currentPositionsSection').style.display = 'none';
       }
@@ -2046,8 +2082,8 @@
     async function searchPostings() {
       const name = document.getElementById('searchName').value.trim();
       const rank = document.getElementById('searchRank').value;
-      const noticeId = document.getElementById('searchNoticeId').value.trim();
-      const noticeType = document.getElementById('searchNoticeType').value;
+      const dateFrom = document.getElementById('searchDateFrom').value;
+      const dateTo = document.getElementById('searchDateTo').value;
 
       const status = document.getElementById('searchStatus');
       status.innerHTML = '<span class="loader"></span> Searching...';
@@ -2070,11 +2106,13 @@
         if (rank) {
           results = results.filter(p => p.rank === rank);
         }
-        if (noticeId) {
-          results = results.filter(p => p.noticeId === noticeId);
+        
+        if (dateFrom) {
+          results = results.filter(p => p.dateFrom >= dateFrom);
         }
-        if (noticeType) {
-          results = results.filter(p => p.noticeType === noticeType);
+        
+        if (dateTo) {
+          results = results.filter(p => p.dateFrom <= dateTo);
         }
         
         // Apply engineer/director filter if active
@@ -2085,99 +2123,69 @@
         // Sort by date
         results.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
         
-        renderResultsGrouped(results);
-        showStatus(status, 'success', `Found ${results.length} results${engineerFilterActive ? ' (Engineers/Directors only)' : ''}`);
+        renderPostingResults(results);
+        showStatus(status, 'success', `Found ${results.length} posting(s)${engineerFilterActive ? ' (Engineers/Directors only)' : ''}`);
 
       } catch (error) {
         showStatus(status, 'error', `❌ Search error: ${error.message}`);
       }
     }
 
-    // Render results grouped by date
-    function renderResultsGrouped(data) {
+    // Render posting results
+    function renderPostingResults(data) {
       const container = document.getElementById('results');
       
       if (data.length === 0) {
-        container.innerHTML = '<p class="no-results">No results found. Try adjusting your search criteria.</p>';
+        container.innerHTML = '<p class="no-results">No postings found. Try adjusting your search criteria.</p>';
         return;
       }
 
-      // Group by date
-      const groupedByDate = {};
-      data.forEach(posting => {
-        const date = posting.dateFrom || 'No Date';
-        if (!groupedByDate[date]) {
-          groupedByDate[date] = [];
-        }
-        groupedByDate[date].push(posting);
-      });
+      let html = `<p style="margin-bottom: 20px;">Showing ${data.length} posting(s)</p>`;
+      html += '<div style="overflow-x: auto;"><table style="width: 100%;">';
+      html += `
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Gender</th>
+            <th>Rank</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Notice</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+      `;
 
-      let html = `<p style="margin-bottom: 20px;">Showing ${data.length} result(s)</p>`;
-      
-      // Sort dates in descending order
-      const sortedDates = Object.keys(groupedByDate).sort((a, b) => {
-        if (a === 'No Date') return 1;
-        if (b === 'No Date') return -1;
-        return b.localeCompare(a);
-      });
-
-      sortedDates.forEach(date => {
-        const postings = groupedByDate[date];
+      data.forEach(d => {
+        const genderIcon = d.gender === 'M' ? '♂️' : d.gender === 'F' ? '♀️' : '❓';
+        const isActing = d.remarks && 
+          (d.remarks.toLowerCase().includes('acting') || 
+           d.remarks.toLowerCase().includes('ag'));
+        const hydStatus = isHyD(d.rank);
         
-        html += `
-          <div class="date-group">
-            <div class="date-header">
-              <h3>${date}</h3>
-              <span class="date-badge">${postings.length} posting(s)</span>
-            </div>
-            <div class="date-content">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Rank</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Date To</th>
-                    <th>Notice</th>
-                    <th>Remarks</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-        `;
-
-        postings.forEach(d => {
-          const isActing = d.remarks && 
-            (d.remarks.toLowerCase().includes('acting') || 
-             d.remarks.toLowerCase().includes('ag'));
-          
-          html += `<tr onclick="viewPostingDetails('${d.id}')" style="cursor: pointer;">
-            <td>
-              <span class="clickable-name">${d.name}</span>
-              ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
-              ${d.name !== d.normalizedName ? `<br><span class="normalized-name">(${d.normalizedName})</span>` : ''}
-            </td>
-            <td>${d.rank || '—'}</td>
-            <td>${d.from || '—'}</td>
-            <td>${d.to || '—'}</td>
-            <td>${d.dateTo || 'Present'}</td>
-            <td>${d.noticeId}<br><small style="color: #666;">${d.noticeType}</small></td>
-            <td>${d.remarks || '—'}</td>
-            <td onclick="event.stopPropagation()">
-              <button class="btn-danger" onclick="deletePosting('${d.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
-            </td>
-          </tr>`;
-        });
-
-        html += `
-                </tbody>
-              </table>
-            </div>
-          </div>
-        `;
+        html += `<tr onclick="viewPostingDetails('${d.id}')" style="cursor: pointer;">
+          <td>${d.dateFrom || 'N/A'}</td>
+          <td>
+            ${d.normalizedName}
+            ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+          </td>
+          <td style="text-align: center;">${genderIcon}</td>
+          <td>${d.rank || '—'}</td>
+          <td>${d.from || '—'}</td>
+          <td>
+            ${d.to || '—'}
+            ${hydStatus ? '<span class="hyd-badge">HyD</span>' : ''}
+          </td>
+          <td>${d.noticeId || '—'}</td>
+          <td onclick="event.stopPropagation()">
+            <button class="btn-danger" onclick="deletePosting('${d.id}')" style="padding: 5px 10px; font-size: 12px;">Delete</button>
+          </td>
+        </tr>`;
       });
 
+      html += '</tbody></table></div>';
       container.innerHTML = html;
     }
 
@@ -2185,11 +2193,12 @@
     function analyzeData() {
       const container = document.getElementById('analysisResults');
       
-      // Rank distribution
+      // Rank distribution among unique personnel
       const rankCounts = {};
-      allPostings.forEach(p => {
-        if (p.rank) {
-          rankCounts[p.rank] = (rankCounts[p.rank] || 0) + 1;
+      uniquePersonnel.forEach(person => {
+        const rank = person.currentRank || person.lastRank;
+        if (rank) {
+          rankCounts[rank] = (rankCounts[rank] || 0) + 1;
         }
       });
       
@@ -2198,22 +2207,10 @@
         .sort((a, b) => b[1] - a[1])
         .slice(0, 10);
       
-      // Unit distribution
-      const unitCounts = {};
-      allPostings.forEach(p => {
-        if (p.to) {
-          unitCounts[p.to] = (unitCounts[p.to] || 0) + 1;
-        }
-      });
-      
-      const sortedUnits = Object.entries(unitCounts)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 10);
-      
       let html = '<div style="margin-top: 20px;">';
       
       // Rank distribution chart
-      html += '<h3 style="margin-bottom: 15px;">Top 10 Ranks by Posting Count</h3>';
+      html += '<h3 style="margin-bottom: 15px;">Top 10 Ranks by Personnel Count</h3>';
       html += '<div class="chart-container">';
       const maxRankCount = Math.max(...sortedRanks.map(r => r[1]));
       sortedRanks.forEach(([rank, count]) => {
@@ -2225,29 +2222,10 @@
         else if (isDirector) bgColor = 'background: linear-gradient(to right, #f39c12, #e67e22);';
         
         html += `
-          <div class="chart-bar">
-            <div class="chart-label">${rank}${isEngineer ? ' 👷' : ''}${isDirector ? ' 👔' : ''}</div>
-            <div class="bar-wrapper">
-              <div class="bar-fill" style="width: ${percentage}%; ${bgColor}">
-                ${count}
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      html += '</div>';
-      
-      // Unit distribution chart
-      html += '<h3 style="margin: 30px 0 15px;">Top 10 Destination Units</h3>';
-      html += '<div class="chart-container">';
-      const maxUnitCount = Math.max(...sortedUnits.map(u => u[1]));
-      sortedUnits.forEach(([unit, count]) => {
-        const percentage = (count / maxUnitCount) * 100;
-        html += `
-          <div class="chart-bar">
-            <div class="chart-label" style="width: 200px;">${unit.substring(0, 30)}${unit.length > 30 ? '...' : ''}</div>
-            <div class="bar-wrapper">
-              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #27ae60, #229954);">
+          <div class="chart-bar" style="display: flex; align-items: center; margin-bottom: 15px;">
+            <div class="chart-label" style="width: 200px;">${rank}${isEngineer ? ' 👷' : ''}${isDirector ? ' 👔' : ''}</div>
+            <div class="bar-wrapper" style="flex: 1; height: 30px; background: #e0e0e0; border-radius: 15px; overflow: hidden; margin: 0 15px;">
+              <div class="bar-fill" style="width: ${percentage}%; height: 100%; ${bgColor} border-radius: 15px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: white; font-size: 12px; font-weight: 600;">
                 ${count}
               </div>
             </div>
@@ -2286,15 +2264,17 @@
         // Show recent promotions
         html += '<h4 style="margin: 20px 0 15px;">Recent Promotions</h4>';
         relevantPromotions.slice(0, 20).forEach(promo => {
+          const genderIcon = promo.gender === 'M' ? '♂️' : promo.gender === 'F' ? '♀️' : '';
+          
           html += `
-            <div class="promotion-item" onclick="viewPostingDetails('${promo.posting.id}')" style="background: ${promo.isActing ? '#fff4e6' : '#f8f9fa'};">
-              <div class="promotion-header">
-                <span class="promotion-name">${promo.name}</span>
-                <span class="promotion-badge" style="background: ${promo.isActing ? '#f39c12' : '#27ae60'};">
+            <div class="promotion-item" onclick="viewPersonHistory('${promo.name}')" style="background: ${promo.isActing ? '#fff4e6' : '#f8f9fa'}; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; border-left: 4px solid ${promo.isActing ? '#f39c12' : '#27ae60'};">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-weight: 600;">${genderIcon} ${promo.name}</span>
+                <span style="background: ${promo.isActing ? '#f39c12' : '#27ae60'}; color: white; padding: 3px 10px; border-radius: 12px; font-size: 12px;">
                   ${promo.isActing ? 'ACTING' : 'PROMOTED'}
                 </span>
               </div>
-              <div class="promotion-details">
+              <div style="font-size: 14px; color: #666;">
                 ${promo.fromRank} → ${promo.toRank} • ${promo.date || 'N/A'}
               </div>
             </div>
@@ -2310,270 +2290,64 @@
       container.innerHTML = html;
     }
 
-    // Analyze trends
-    function analyzeTrends() {
+    // Analyze gender
+    function analyzeGender() {
       const container = document.getElementById('analysisResults');
       
-      // Group by year
-      const yearCounts = {};
-      allPostings.forEach(p => {
-        if (p.dateFrom) {
-          const year = p.dateFrom.substring(0, 4);
-          yearCounts[year] = (yearCounts[year] || 0) + 1;
-        }
+      // Gender distribution by department
+      const currentPositions = getCurrentPositions();
+      const departmentGender = {};
+      
+      Object.entries(currentPositions).forEach(([dept, personnel]) => {
+        departmentGender[dept] = {
+          male: personnel.filter(p => p.gender === 'M').length,
+          female: personnel.filter(p => p.gender === 'F').length,
+          unknown: personnel.filter(p => p.gender === 'U').length,
+          total: personnel.length
+        };
       });
       
-      const sortedYears = Object.entries(yearCounts)
-        .sort((a, b) => a[0].localeCompare(b[0]));
-      
-      // Monthly trends for current year
-      const currentYear = new Date().getFullYear().toString();
-      const monthCounts = {};
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      
-      allPostings.forEach(p => {
-        if (p.dateFrom && p.dateFrom.startsWith(currentYear)) {
-          const month = parseInt(p.dateFrom.substring(5, 7)) - 1;
-          monthCounts[month] = (monthCounts[month] || 0) + 1;
-        }
-      });
+      // Sort by total personnel
+      const sortedDepts = Object.entries(departmentGender)
+        .sort((a, b) => b[1].total - a[1].total)
+        .slice(0, 15);
       
       let html = '<div style="margin-top: 20px;">';
+      html += '<h3 style="margin-bottom: 15px;">Gender Distribution by Department (Current Positions)</h3>';
       
-      // Yearly trends
-      html += '<h3 style="margin-bottom: 15px;">Postings by Year</h3>';
-      html += '<div class="chart-container">';
-      const maxYearCount = Math.max(...sortedYears.map(y => y[1]));
-      sortedYears.forEach(([year, count]) => {
-        const percentage = (count / maxYearCount) * 100;
-        html += `
-          <div class="chart-bar">
-            <div class="chart-label">${year}</div>
-            <div class="bar-wrapper">
-              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #f39c12, #e67e22);">
-                ${count}
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      html += '</div>';
-      
-      // Monthly trends
-      html += `<h3 style="margin: 30px 0 15px;">Monthly Trends - ${currentYear}</h3>`;
-      html += '<div class="chart-container">';
-      const maxMonthCount = Math.max(...Object.values(monthCounts));
-      monthNames.forEach((month, index) => {
-        const count = monthCounts[index] || 0;
-        const percentage = maxMonthCount > 0 ? (count / maxMonthCount) * 100 : 0;
-        html += `
-          <div class="chart-bar">
-            <div class="chart-label" style="width: 60px;">${month}</div>
-            <div class="bar-wrapper">
-              <div class="bar-fill" style="width: ${percentage}%; background: linear-gradient(to right, #9b59b6, #8e44ad);">
-                ${count}
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      html += '</div>';
-      
-      html += '</div>';
-      container.innerHTML = html;
-    }
-
-    // Toggle engineers section
-    function toggleEngineersSection() {
-      const content = document.getElementById('engineersContent');
-      const toggle = document.getElementById('engineersToggle');
-      
-      if (content.classList.contains('open')) {
-        content.classList.remove('open');
-        toggle.classList.remove('open');
-      } else {
-        content.classList.add('open');
-        toggle.classList.add('open');
-        loadEngineersSection();
-      }
-    }
-
-    // Load engineers section
-    function loadEngineersSection() {
-      const engineersAndDirectors = allPostings.filter(p => isEngineerOrDirectorRank(p.rank));
-      
-      // Group by rank
-      const byRank = {};
-      engineersAndDirectors.forEach(person => {
-        if (!byRank[person.rank]) {
-          byRank[person.rank] = [];
-        }
-        byRank[person.rank].push(person);
-      });
-      
-      // Create filters
-      const filtersDiv = document.getElementById('engineerFilters');
-      filtersDiv.innerHTML = '<button class="engineer-rank-tab active" onclick="filterEngineers(\'all\')">All Personnel</button>';
-      
-      // Sort ranks by hierarchy
-      const rankOrder = ['Director', 'D', 'Deputy Director', 'DD', 'Assistant Director', 'AD',
-                        'Chief Engineer', 'CE', 'Senior Engineer', 'SE', 'Engineer', 'E', 'Assistant Engineer', 'AE'];
-      const sortedRanks = Object.keys(byRank).sort((a, b) => {
-        const aIndex = rankOrder.findIndex(r => a.includes(r));
-        const bIndex = rankOrder.findIndex(r => b.includes(r));
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
-        return a.localeCompare(b);
-      });
-      
-      sortedRanks.forEach(rank => {
-        filtersDiv.innerHTML += `<button class="engineer-rank-tab" onclick="filterEngineers('${rank}')">${rank} (${byRank[rank].length})</button>`;
-      });
-      
-      // Stats
-      const statsDiv = document.getElementById('engineersStats');
-      const uniquePersonnel = new Set(engineersAndDirectors.map(e => e.normalizedName));
-      const engineers = engineersAndDirectors.filter(p => isEngineerRank(p.rank));
-      const directors = engineersAndDirectors.filter(p => isDirectorRank(p.rank));
-      
-      statsDiv.innerHTML = `
-        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-          <strong>Total Postings:</strong> ${engineersAndDirectors.length} | 
-          <strong>Unique Personnel:</strong> ${uniquePersonnel.size} | 
-          <strong>Engineers:</strong> ${new Set(engineers.map(e => e.normalizedName)).size} | 
-          <strong>Directors:</strong> ${new Set(directors.map(d => d.normalizedName)).size}
-        </div>
-      `;
-      
-      // Display all initially
-      displayEngineers(engineersAndDirectors);
-    }
-
-    // Filter engineers
-    function filterEngineers(rank) {
-      // Update active tab
-      document.querySelectorAll('.engineer-rank-tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-      event.target.classList.add('active');
-      
-      // Filter data
-      let filtered;
-      if (rank === 'all') {
-        filtered = allPostings.filter(p => isEngineerOrDirectorRank(p.rank));
-      } else {
-        filtered = allPostings.filter(p => p.rank === rank);
-      }
-      
-      displayEngineers(filtered);
-    }
-
-    // Display engineers
-    function displayEngineers(personnel) {
-      const container = document.getElementById('engineersList');
-      
-      // Sort by date
-      personnel.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      let html = '<div class="engineers-grid">';
-      personnel.forEach(person => {
-        const isActing = person.remarks && 
-          (person.remarks.toLowerCase().includes('acting') || 
-           person.remarks.toLowerCase().includes('ag'));
+      sortedDepts.forEach(([dept, stats]) => {
+        const malePercent = (stats.male / stats.total * 100).toFixed(1);
+        const femalePercent = (stats.female / stats.total * 100).toFixed(1);
         
         html += `
-          <div class="engineer-card" onclick="viewPostingDetails('${person.id}')">
-            <div class="engineer-name">
-              ${person.name}
-              ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
-              ${person.name !== person.normalizedName ? `<br><span class="normalized-name">(${person.normalizedName})</span>` : ''}
+          <div style="margin-bottom: 20px;">
+            <div style="font-weight: 600; margin-bottom: 5px;">${dept.substring(0, 50)}${dept.length > 50 ? '...' : ''}</div>
+            <div style="display: flex; height: 25px; border-radius: 12px; overflow: hidden; background: #e0e0e0;">
+              ${stats.male > 0 ? `<div style="width: ${malePercent}%; background: #2196f3; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">♂️ ${stats.male}</div>` : ''}
+              ${stats.female > 0 ? `<div style="width: ${femalePercent}%; background: #e91e63; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">♀️ ${stats.female}</div>` : ''}
+              ${stats.unknown > 0 ? `<div style="flex: 1; background: #999; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">? ${stats.unknown}</div>` : ''}
             </div>
-            <div class="engineer-details">
-              <strong>${person.rank}</strong><br>
-              ${person.from || 'N/A'} → ${person.to || 'N/A'}<br>
-              ${person.dateFrom || 'N/A'} - ${person.dateTo || 'Present'}<br>
-              <small style="color: #999;">${person.noticeId} (${person.noticeType})</small>
+            <div style="font-size: 12px; color: #666; margin-top: 5px;">
+              Total: ${stats.total} (Male: ${stats.male}, Female: ${stats.female}${stats.unknown > 0 ? `, Unknown: ${stats.unknown}` : ''})
             </div>
           </div>
         `;
       });
+      
       html += '</div>';
-      
       container.innerHTML = html;
-    }
-
-    // Search person suggestions
-    function searchPerson() {
-      const searchTerm = document.getElementById('personSearch').value.toLowerCase();
-      const suggestions = document.getElementById('personSuggestions');
-      
-      if (searchTerm.length < 2) {
-        suggestions.innerHTML = '';
-        return;
-      }
-      
-      // Search both original and normalized names
-      const peopleMap = new Map();
-      allPostings.forEach(posting => {
-        const normalizedName = posting.normalizedName;
-        if (!peopleMap.has(normalizedName)) {
-          peopleMap.set(normalizedName, {
-            names: new Set(),
-            postings: []
-          });
-        }
-        peopleMap.get(normalizedName).names.add(posting.name);
-        peopleMap.get(normalizedName).postings.push(posting);
-      });
-      
-      const matches = [];
-      peopleMap.forEach((data, normalizedName) => {
-        const allNames = Array.from(data.names).join(', ');
-        if (normalizedName.toLowerCase().includes(searchTerm) || 
-            allNames.toLowerCase().includes(searchTerm)) {
-          matches.push({
-            normalizedName: normalizedName,
-            displayName: Array.from(data.names)[0],
-            allNames: allNames,
-            rank: data.postings[0]?.rank || 'Unknown',
-            postingCount: data.postings.length
-          });
-        }
-      });
-      
-      suggestions.innerHTML = matches.slice(0, 10).map(person => {
-        return `
-          <div class="person-card" onclick="selectPerson('${person.displayName}')">
-            <div class="person-name">${person.displayName}</div>
-            <div class="person-info">
-              ${person.rank} • ${person.postingCount} posting(s)
-              ${person.allNames !== person.displayName ? `<br><small>Also as: ${person.allNames}</small>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // Select person
-    function selectPerson(name) {
-      document.getElementById('personSearch').value = name;
-      document.getElementById('personSuggestions').innerHTML = '';
     }
 
     // View person history
-    function viewPersonHistory() {
-      const personName = document.getElementById('personSearch').value;
-      if (!personName) {
-        alert('Please select a person');
-        return;
-      }
+    function viewPersonHistory(personName) {
+      // If called from personnel list, we already have the normalized name
+      const person = Array.from(uniquePersonnel.values()).find(p => 
+        p.displayName === personName || 
+        p.postings.some(posting => posting.name === personName || posting.normalizedName === personName)
+      );
       
-      const normalizedSearchName = normalizeName(personName);
-      const personPostings = allPostings
-        .filter(p => p.name === personName || p.normalizedName === normalizedSearchName)
-        .sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      if (personPostings.length === 0) {
-        alert('No postings found for this person');
+      if (!person) {
+        alert('Person not found');
         return;
       }
       
@@ -2581,21 +2355,17 @@
       const modalTitle = document.getElementById('modalTitle');
       const modalBody = document.getElementById('modalBody');
       
-      // Get all name variations
-      const nameVariations = new Set(personPostings.map(p => p.name));
-      const titleText = nameVariations.size > 1 
-        ? `Posting History: ${Array.from(nameVariations).join(' / ')}`
-        : `Posting History: ${personName}`;
+      const genderIcon = person.gender === 'M' ? '♂️' : person.gender === 'F' ? '♀️' : '❓';
       
-      modalTitle.textContent = titleText;
+      modalTitle.innerHTML = `${genderIcon} Posting History: ${person.displayName}`;
       
       // Check for promotions
       const promotions = detectPromotions();
-      const personPromotions = promotions.filter(p => p.normalizedName === normalizedSearchName);
+      const personPromotions = promotions.filter(p => p.normalizedName === person.displayName);
       
       // Get current position
       const today = new Date().toISOString().split('T')[0];
-      const currentPosition = personPostings.find(p => !p.dateTo || p.dateTo >= today);
+      const currentPosition = person.postings.find(p => !p.dateTo || p.dateTo >= today);
       
       let html = '';
       
@@ -2603,6 +2373,8 @@
         html += `
           <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
             <strong style="color: #0c5460;">📍 Current Position:</strong> ${currentPosition.to} (${currentPosition.rank}) since ${currentPosition.dateFrom}
+            ${currentPosition.remarks && (currentPosition.remarks.toLowerCase().includes('acting') || currentPosition.remarks.toLowerCase().includes('ag')) ? '<span class="acting-badge">ACTING</span>' : ''}
+            ${isHyD(currentPosition.rank) ? '<span class="hyd-badge">HyD</span>' : ''}
           </div>
         `;
       }
@@ -2616,11 +2388,12 @@
       }
       
       html += '<div class="timeline">';
-      personPostings.forEach((posting, index) => {
+      person.postings.forEach((posting, index) => {
         const isPromotion = personPromotions.find(p => p.posting.id === posting.id);
         const isActing = posting.remarks && 
           (posting.remarks.toLowerCase().includes('acting') || 
            posting.remarks.toLowerCase().includes('ag'));
+        const hydStatus = isHyD(posting.rank);
         
         html += `
           <div class="timeline-item">
@@ -2633,110 +2406,13 @@
               <div class="timeline-title">
                 ${posting.from || 'N/A'} → ${posting.to || 'N/A'}
                 ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
+                ${hydStatus ? '<span class="hyd-badge">HyD</span>' : ''}
               </div>
               <div class="timeline-details">
                 <strong>Rank:</strong> ${posting.rank || 'N/A'}<br>
                 <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
                 ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}<br>` : ''}
-                <strong>Name as recorded:</strong> ${posting.name}
                 ${isPromotion ? `<br><strong style="color: #f39c12;">Promoted from ${isPromotion.fromRank}</strong>` : ''}
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      html += '</div>';
-      
-      modalBody.innerHTML = html;
-      modal.style.display = 'block';
-    }
-
-    // View position history
-    function viewPositionHistory() {
-      const position = document.getElementById('positionSearch').value;
-      const field = document.getElementById('positionField').value;
-      
-      if (!position) {
-        alert('Please enter a position or unit name');
-        return;
-      }
-      
-      let positionPostings = [];
-      
-      if (field === 'from' || field === 'both') {
-        positionPostings = positionPostings.concat(
-          allPostings.filter(p => p.from && p.from.toLowerCase().includes(position.toLowerCase()))
-        );
-      }
-      
-      if (field === 'to' || field === 'both') {
-        positionPostings = positionPostings.concat(
-          allPostings.filter(p => p.to && p.to.toLowerCase().includes(position.toLowerCase()))
-        );
-      }
-      
-      const uniquePostings = Array.from(new Map(positionPostings.map(p => [p.id, p])).values());
-      uniquePostings.sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      if (uniquePostings.length === 0) {
-        alert('No postings found for this position');
-        return;
-      }
-      
-      const modal = document.getElementById('detailModal');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalBody = document.getElementById('modalBody');
-      
-      modalTitle.textContent = `Position History: ${position}`;
-      
-      // Find current occupants
-      const today = new Date().toISOString().split('T')[0];
-      const currentOccupants = uniquePostings.filter(p => 
-        p.to && p.to.toLowerCase().includes(position.toLowerCase()) && 
-        (!p.dateTo || p.dateTo >= today)
-      );
-      
-      let html = '';
-      
-      if (currentOccupants.length > 0) {
-        html += `
-          <div style="background: #d1ecf1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <strong style="color: #0c5460;">📍 Current Occupants:</strong><br>
-        `;
-        currentOccupants.forEach(occupant => {
-          const isActing = occupant.remarks && 
-            (occupant.remarks.toLowerCase().includes('acting') || 
-             occupant.remarks.toLowerCase().includes('ag'));
-          html += `• ${occupant.name} (${occupant.rank}) ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}<br>`;
-        });
-        html += '</div>';
-      }
-      
-      html += '<div class="timeline">';
-      uniquePostings.forEach((posting, index) => {
-        const isIncoming = posting.to && posting.to.toLowerCase().includes(position.toLowerCase());
-        const isOutgoing = posting.from && posting.from.toLowerCase().includes(position.toLowerCase());
-        const isActing = posting.remarks && 
-          (posting.remarks.toLowerCase().includes('acting') || 
-           posting.remarks.toLowerCase().includes('ag'));
-        
-        html += `
-          <div class="timeline-item">
-            <div class="timeline-marker" style="background: ${isIncoming ? '#27ae60' : '#e74c3c'}">
-              ${isIncoming ? '→' : '←'}
-            </div>
-            <div class="timeline-content" style="border-left-color: ${isIncoming ? '#27ae60' : '#e74c3c'}; cursor: pointer;" 
-                 onclick="viewPostingDetails('${posting.id}')">
-              <div class="timeline-date">${posting.dateFrom || 'N/A'} - ${posting.dateTo || 'Present'}</div>
-              <div class="timeline-title">
-                ${posting.name} (${posting.rank || 'N/A'})
-                ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
-              </div>
-              <div class="timeline-details">
-                <strong>${isIncoming ? 'Incoming from' : 'Outgoing to'}:</strong> 
-                ${isIncoming ? posting.from || 'N/A' : posting.to || 'N/A'}<br>
-                <strong>Notice:</strong> ${posting.noticeId} (${posting.noticeType})<br>
-                ${posting.remarks ? `<strong>Remarks:</strong> ${posting.remarks}` : ''}
               </div>
             </div>
           </div>
@@ -2762,14 +2438,15 @@
       const isActing = posting.remarks && 
         (posting.remarks.toLowerCase().includes('acting') || 
          posting.remarks.toLowerCase().includes('ag'));
+      const hydStatus = isHyD(posting.rank);
+      const genderIcon = posting.gender === 'M' ? '♂️' : posting.gender === 'F' ? '♀️' : '❓';
       
       let html = `
         <div style="margin-bottom: 20px;">
           <h3 style="color: #2c3e50; margin-bottom: 15px;">
-            ${posting.name}
+            ${genderIcon} ${posting.normalizedName}
             ${isActing ? '<span class="acting-badge">ACTING</span>' : ''}
           </h3>
-          ${posting.name !== posting.normalizedName ? `<p style="color: #666; font-style: italic;">Normalized: ${posting.normalizedName}</p>` : ''}
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
             <div>
               <strong>Rank:</strong> ${posting.rank || 'N/A'}
@@ -2789,7 +2466,7 @@
               <strong>From:</strong> ${posting.from || 'N/A'}
             </div>
             <div style="grid-column: span 2;">
-              <strong>To:</strong> ${posting.to || 'N/A'}
+              <strong>To:</strong> ${posting.to || 'N/A'} ${hydStatus ? '<span class="hyd-badge">HyD</span>' : ''}
             </div>
             ${posting.remarks ? `
             <div style="grid-column: span 2;">
@@ -2812,110 +2489,6 @@
             ${isPromotion.fromRank} → ${isPromotion.toRank}
           </div>
         `;
-      }
-      
-      // Find related postings
-      const relatedByPerson = allPostings.filter(p => 
-        p.id !== postingId && p.normalizedName === posting.normalizedName
-      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      // Find postings on same date
-      const sameDate = allPostings.filter(p => 
-        p.id !== postingId && p.dateFrom === posting.dateFrom
-      ).sort((a, b) => a.name.localeCompare(b.name));
-      
-      const relatedByPosition = allPostings.filter(p => 
-        p.id !== postingId && (
-          (posting.from && (p.from === posting.from || p.to === posting.from)) ||
-          (posting.to && (p.from === posting.to || p.to === posting.to))
-        )
-      ).sort((a, b) => (b.dateFrom || '').localeCompare(a.dateFrom || ''));
-      
-      if (sameDate.length > 0) {
-        html += `
-          <div class="related-section">
-            <h3>Other Postings on ${posting.dateFrom}</h3>
-        `;
-        sameDate.slice(0, 10).forEach(related => {
-          const relatedIsActing = related.remarks && 
-            (related.remarks.toLowerCase().includes('acting') || 
-             related.remarks.toLowerCase().includes('ag'));
-          
-          html += `
-            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
-              <div style="font-weight: 600; margin-bottom: 5px;">
-                ${related.name} (${related.rank || 'N/A'})
-                ${relatedIsActing ? '<span class="acting-badge">ACTING</span>' : ''}
-              </div>
-              <div style="font-size: 14px; color: #666;">
-                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
-                ${related.noticeId} (${related.noticeType})
-              </div>
-            </div>
-          `;
-        });
-        if (sameDate.length > 10) {
-          html += `<p style="text-align: center; color: #666; margin-top: 10px;">...and ${sameDate.length - 10} more</p>`;
-        }
-        html += '</div>';
-      }
-      
-      if (relatedByPerson.length > 0) {
-        html += `
-          <div class="related-section">
-            <h3>Other Postings for ${posting.name}</h3>
-        `;
-        relatedByPerson.forEach(related => {
-          const relatedIsActing = related.remarks && 
-            (related.remarks.toLowerCase().includes('acting') || 
-             related.remarks.toLowerCase().includes('ag'));
-          
-          html += `
-            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
-              <div style="font-weight: 600; margin-bottom: 5px;">
-                ${related.from || 'N/A'} → ${related.to || 'N/A'}
-                ${relatedIsActing ? '<span class="acting-badge">ACTING</span>' : ''}
-              </div>
-              <div style="font-size: 14px; color: #666;">
-                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'} • 
-                ${related.noticeId} (${related.noticeType})
-              </div>
-            </div>
-          `;
-        });
-        html += '</div>';
-      }
-      
-      if (relatedByPosition.length > 0) {
-        html += `
-          <div class="related-section">
-            <h3>Related Position Movements</h3>
-        `;
-        relatedByPosition.slice(0, 10).forEach(related => {
-          const isRelatedToFrom = posting.from && (related.from === posting.from || related.to === posting.from);
-          const isRelatedToTo = posting.to && (related.from === posting.to || related.to === posting.to);
-          const relatedIsActing = related.remarks && 
-            (related.remarks.toLowerCase().includes('acting') || 
-             related.remarks.toLowerCase().includes('ag'));
-          
-          html += `
-            <div class="related-item" onclick="viewPostingDetails('${related.id}')">
-              <div style="font-weight: 600; margin-bottom: 5px;">
-                ${related.name} (${related.rank || 'N/A'})
-                ${relatedIsActing ? '<span class="acting-badge">ACTING</span>' : ''}
-              </div>
-              <div style="font-size: 14px; color: #666;">
-                ${related.from || 'N/A'} → ${related.to || 'N/A'} • 
-                ${related.dateFrom || 'N/A'} - ${related.dateTo || 'Present'}
-              </div>
-              <div style="font-size: 12px; color: #999; margin-top: 3px;">
-                ${isRelatedToFrom ? `Related to: ${posting.from}` : ''}
-                ${isRelatedToTo ? `Related to: ${posting.to}` : ''}
-              </div>
-            </div>
-          `;
-        });
-        html += '</div>';
       }
       
       modalBody.innerHTML = html;
@@ -2952,8 +2525,9 @@
         const duplicates = [];
 
         data.forEach(entry => {
-          // Add normalized name
+          // Add normalized name and gender
           entry.normalizedName = normalizeName(entry.name);
+          entry.gender = detectGender(entry.name);
           
           if (entry.noticeId && existingNoticeIds.has(entry.noticeId)) {
             duplicates.push(entry.noticeId);
@@ -2992,7 +2566,6 @@
         await loadAllData();
         updateStatistics();
         populateFilters();
-        loadEngineersSection();
 
       } catch (err) {
         showStatus(status, 'error', `❌ Error: ${err.message}`);
@@ -3024,46 +2597,47 @@
     // Export results
     function exportResults() {
       const container = document.getElementById('results');
-      const dateGroups = container.querySelectorAll('.date-group');
+      const table = container.querySelector('table');
       
-      if (dateGroups.length === 0) {
+      if (!table) {
         alert('No data to export. Please perform a search first.');
         return;
       }
 
-      let csv = 'Date From,Name,Normalized Name,Rank,From,To,Date To,Notice ID,Notice Type,Remarks,Acting\n';
+      let csv = 'Date,Name,Gender,Rank,From,To,HyD,Notice ID,Acting,Remarks\n';
       
-      dateGroups.forEach(group => {
-        const date = group.querySelector('.date-header h3').textContent;
-        const rows = group.querySelectorAll('tbody tr');
+      const rows = table.querySelectorAll('tbody tr');
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const dateText = cells[0].textContent;
+        const nameText = cells[1].textContent.replace('ACTING', '').trim();
+        const genderText = cells[2].textContent === '♂️' ? 'Male' : cells[2].textContent === '♀️' ? 'Female' : 'Unknown';
+        const rankText = cells[3].textContent;
+        const fromText = cells[4].textContent;
+        const toText = cells[5].textContent.replace('HyD', '').trim();
+        const hydStatus = cells[5].textContent.includes('HyD') ? 'Yes' : 'No';
+        const noticeText = cells[6].textContent;
+        const isActing = cells[1].textContent.includes('ACTING') ? 'Yes' : 'No';
         
-        rows.forEach(row => {
-          const cells = row.querySelectorAll('td');
-          const nameCell = cells[0].textContent.split('\n');
-          const name = nameCell[0].replace('ACTING', '').trim();
-          const normalizedName = nameCell[nameCell.length - 1].includes('(') ? 
-            nameCell[nameCell.length - 1].replace(/[()]/g, '').trim() : name;
-          const noticeText = cells[5].textContent.split('\n');
-          const remarks = cells[6].textContent;
-          const isActing = nameCell[0].includes('ACTING') || 
-            (remarks && (remarks.toLowerCase().includes('acting') || remarks.toLowerCase().includes('ag')));
-          
-          csv += `"${date}","${name}","${normalizedName}","${cells[1].textContent}","${cells[2].textContent}","${cells[3].textContent}","${cells[4].textContent}","${noticeText[0]}","${noticeText[1]}","${remarks}","${isActing ? 'Yes' : 'No'}"\n`;
-        });
+        // Get remarks from the actual posting data
+        const posting = allPostings.find(p => p.normalizedName === nameText && p.dateFrom === dateText);
+        const remarks = posting ? posting.remarks || '' : '';
+        
+        csv += `"${dateText}","${nameText}","${genderText}","${rankText}","${fromText}","${toText}","${hydStatus}","${noticeText}","${isActing}","${remarks}"\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `posting_notices_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `posting_results_${new Date().toISOString().split('T')[0]}.csv`;
       a.click();
     }
 
     // Download JSON template
     function downloadTemplate() {
       const template = [{
-        name: "John Doe",
+        name: "Mr John Doe",
         rank: "Captain",
         from: "Unit A",
         to: "Unit B",
@@ -3098,8 +2672,8 @@
     function resetFilters() {
       document.getElementById('searchName').value = '';
       document.getElementById('searchRank').value = '';
-      document.getElementById('searchNoticeId').value = '';
-      document.getElementById('searchNoticeType').value = '';
+      document.getElementById('searchDateFrom').value = '';
+      document.getElementById('searchDateTo').value = '';
       document.getElementById('results').innerHTML = '';
       document.getElementById('searchStatus').className = 'status';
       // Reset engineer filter
