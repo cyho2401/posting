@@ -183,13 +183,43 @@
       border-color: #2980b9;
     }
 
-    .rank-filter-btn.engineer {
+    .rank-filter-btn.ce {
       background: #e8d4f1;
       color: #8e44ad;
     }
 
-    .rank-filter-btn.engineer.active {
+    .rank-filter-btn.ce.active {
       background: #9b59b6;
+      color: white;
+    }
+
+    .rank-filter-btn.se {
+      background: #dcc9e8;
+      color: #7d3c98;
+    }
+
+    .rank-filter-btn.se.active {
+      background: #8e44ad;
+      color: white;
+    }
+
+    .rank-filter-btn.e {
+      background: #d5b8e5;
+      color: #6c3483;
+    }
+
+    .rank-filter-btn.e.active {
+      background: #7d3c98;
+      color: white;
+    }
+
+    .rank-filter-btn.ae {
+      background: #ceaadf;
+      color: #5b2c6f;
+    }
+
+    .rank-filter-btn.ae.active {
+      background: #6c3483;
       color: white;
     }
 
@@ -284,7 +314,7 @@
       padding: 12px 20px;
       border-bottom: 1px solid #f0f0f0;
       display: grid;
-      grid-template-columns: 30px 1fr 2fr 120px 120px 100px;
+      grid-template-columns: 30px 1fr 2fr 120px 100px 80px;
       gap: 15px;
       align-items: center;
       cursor: pointer;
@@ -293,7 +323,6 @@
 
     .staff-item:hover {
       background: #f8f9fa;
-      transform: translateX(5px);
     }
 
     .staff-item:last-child {
@@ -339,8 +368,23 @@
       font-weight: 600;
     }
 
-    .engineer-badge {
+    .ce-badge {
       background: #9b59b6;
+      color: white;
+    }
+
+    .se-badge {
+      background: #8e44ad;
+      color: white;
+    }
+
+    .e-badge {
+      background: #7d3c98;
+      color: white;
+    }
+
+    .ae-badge {
+      background: #6c3483;
       color: white;
     }
 
@@ -389,24 +433,53 @@
       border-color: #3498db;
     }
 
-    .action-btn.match {
-      border-color: #27ae60;
-      color: #27ae60;
+    .action-btn.edit {
+      border-color: #3498db;
+      color: #3498db;
     }
 
-    .action-btn.match:hover {
-      background: #27ae60;
+    .action-btn.edit:hover {
+      background: #3498db;
       color: white;
     }
 
-    .action-btn.unmatch {
-      border-color: #e74c3c;
-      color: #e74c3c;
+    /* Edit Form */
+    .edit-form {
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
     }
 
-    .action-btn.unmatch:hover {
-      background: #e74c3c;
-      color: white;
+    .edit-form input,
+    .edit-form select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .edit-form input:focus,
+    .edit-form select:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .edit-form label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
     }
 
     /* Collapsible */
@@ -498,6 +571,14 @@
 
     .btn-success:hover {
       background: #229954;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
     }
 
     /* Status Messages */
@@ -638,30 +719,26 @@
       color: #333;
     }
 
-    /* Duplicate Management Modal */
-    .duplicate-list {
-      max-height: 400px;
-      overflow-y: auto;
+    /* Duplicate List */
+    .duplicate-group {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .duplicate-group h4 {
+      margin-bottom: 10px;
+      color: #2c3e50;
     }
 
     .duplicate-item {
-      padding: 15px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      background: #f8f9fa;
-    }
-
-    .duplicate-item.selected {
-      background: #e3f2fd;
-      border-color: #3498db;
-    }
-
-    .duplicate-actions {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
+      padding: 10px;
+      margin-bottom: 5px;
+      background: white;
+      border-radius: 4px;
+      font-size: 14px;
     }
 
     /* Responsive */
@@ -723,7 +800,7 @@
       <button class="tab-button active" onclick="switchTab('staff')">Staff Directory</button>
       <button class="tab-button" onclick="switchTab('upload')">Upload Data</button>
       <button class="tab-button" onclick="switchTab('postings')">Posting Notices</button>
-      <button class="tab-button" onclick="switchTab('duplicates')">Manage Duplicates</button>
+      <button class="tab-button" onclick="switchTab('duplicates')">Duplicate Names</button>
     </div>
 
     <!-- Staff List Tab -->
@@ -737,7 +814,10 @@
           <div class="filter-group">
             <label>Filter by Rank Categories:</label>
             <div class="rank-filters" id="rankFilters">
-              <button class="rank-filter-btn engineer" onclick="toggleRankFilter('engineer')">Engineers</button>
+              <button class="rank-filter-btn ce" onclick="toggleRankFilter('ce')">CE/Chief Engineer</button>
+              <button class="rank-filter-btn se" onclick="toggleRankFilter('se')">SE/Senior Engineer</button>
+              <button class="rank-filter-btn e" onclick="toggleRankFilter('e')">E/Engineer</button>
+              <button class="rank-filter-btn ae" onclick="toggleRankFilter('ae')">AE/Assistant Engineer</button>
               <button class="rank-filter-btn director" onclick="toggleRankFilter('director')">Directors</button>
               <button class="rank-filter-btn chief" onclick="toggleRankFilter('chief')">Chiefs/Heads</button>
               <button class="rank-filter-btn" onclick="toggleRankFilter('all')">Show All</button>
@@ -807,7 +887,7 @@
     <!-- Duplicates Tab -->
     <div id="duplicatesTab" class="tab-content">
       <div class="card">
-        <h2>👥 Manage Duplicate Names</h2>
+        <h2>👥 Duplicate Names</h2>
         
         <div id="duplicatesContent"></div>
       </div>
@@ -825,14 +905,14 @@
     </div>
   </div>
 
-  <!-- Duplicate Match Modal -->
-  <div id="duplicateModal" class="modal">
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h2>Match/Unmatch Duplicate Names</h2>
-        <span class="modal-close" onclick="closeDuplicateModal()">&times;</span>
+        <h2>Edit Staff Information</h2>
+        <span class="modal-close" onclick="closeEditModal()">&times;</span>
       </div>
-      <div id="duplicateModalBody"></div>
+      <div id="editModalBody"></div>
     </div>
   </div>
 
@@ -856,8 +936,7 @@
     let filteredStaff = [];
     let allPostings = [];
     let staffPostingsMap = new Map();
-    let duplicateGroups = new Map(); // Groups of potentially duplicate names
-    let manualMatches = new Map(); // Manual matches/unmatches
+    let duplicateGroups = new Map();
     let activeRankFilters = new Set();
     let collapsedDepartments = new Set();
     let collapsedOffices = new Set();
@@ -874,34 +953,49 @@
       'Chief': 80, 'Ch': 80,
       'Project Manager': 78, 'PM': 78,
       'Project Team Leader': 76,
-      'Principal': 75, 'Prin': 75,
+      'Commissioner': 75, 'Comr': 75,
       
       // Engineers
       'Chief Engineer': 70, 'CE': 70, 'Ch Engr': 70,
-      'Senior Engineer': 65, 'SE': 65, 'Sr Engr': 65,
-      'Engineer': 60, 'E': 60, 'Engr': 60,
-      'Assistant Engineer': 55, 'AE': 55, 'Asst Engr': 55,
-      
-      // Geo Engineers
       'Chief Geotechnical Engineer': 70, 'Ch Geo Engr': 70,
+      'Senior Engineer': 65, 'SE': 65, 'Sr Engr': 65,
       'Senior Geotechnical Engineer': 65, 'Sr Geo Engr': 65,
+      'Engineer': 60, 'E': 60, 'Engr': 60,
       'Geotechnical Engineer': 60, 'Geo Engr': 60,
+      'Assistant Engineer': 55, 'AE': 55, 'Asst Engr': 55,
       'Assistant Geotechnical Engineer': 55, 'Asst Geo Engr': 55,
       
-      // Other positions
-      'Manager': 50,
-      'Secretary': 45,
-      'Officer': 40
+      // Technical Officers (not chiefs)
+      'Principal Technical Officer': 50, 'PTO': 50, 'Prin Tech Offr': 50,
+      'Senior Technical Officer': 45, 'STO': 45, 'Sr Tech Offr': 45,
+      'Technical Officer': 40, 'TO': 40, 'Tech Offr': 40,
+      
+      // Other management
+      'Principal': 48, 'Prin': 48,
+      'Manager': 47,
+      'Secretary': 46,
+      'Officer': 35
     };
 
     // Define patterns for categorization
-    const engineerPatterns = [
+    const cePatterns = [
       /^Chief Engineer/i, /^CE\b/i, /^Ch\s*Engr/i,
+      /^Chief\s+Geo(?:technical)?\s*Engr/i, /^Ch\s*Geo\s*Engr/i
+    ];
+
+    const sePatterns = [
       /^Senior Engineer/i, /^SE\b/i, /^Sr\s*Engr/i,
+      /^Senior\s+Geo(?:technical)?\s*Engr/i, /^Sr\s*Geo\s*Engr/i
+    ];
+
+    const ePatterns = [
       /^Engineer(?!\s*Specialist)/i, /^E\b/i, /^Engr\b/i,
+      /^Geo(?:technical)?\s*Engr/i
+    ];
+
+    const aePatterns = [
       /^Assistant Engineer/i, /^AE\b/i, /^Asst\s*Engr/i,
-      /Geo(?:technical)?\s*Engr/i, /^Sr\s*Geo\s*Engr/i,
-      /^Ch\s*Geo\s*Engr/i, /^Asst\s*Geo\s*Engr/i
+      /^Assistant\s+Geo(?:technical)?\s*Engr/i, /^Asst\s*Geo\s*Engr/i
     ];
 
     const directorPatterns = [
@@ -910,15 +1004,12 @@
       /^Assistant Director/i, /^Asst\s*Dir/i, /^AD\b/i
     ];
 
-    const managementPatterns = [
+    const chiefManagementPatterns = [
       /^Head\s+of/i, /^Dep\s*Head/i,
-      /^Chief/i, /^Ch\b/i,
-      /^Principal/i, /^Prin\b/i,
+      /^Chief(?!\s+Engineer|\s+Geo)/i, /^Ch\b(?!\s*Engr|\s*Geo)/i,
       /Project\s*Manager/i, /^PM\b/i,
       /Project\s*Team\s*Leader/i,
-      /Commissioner/i, /Comr\./i,
-      /Secretary/i,
-      /Manager/i
+      /Commissioner/i, /Comr\./i
     ];
 
     // Initialize app
@@ -970,11 +1061,6 @@
         }
       }
       
-      // Check patterns
-      if (engineerPatterns.some(p => p.test(postTitle))) return 50;
-      if (directorPatterns.some(p => p.test(postTitle))) return 85;
-      if (managementPatterns.some(p => p.test(postTitle))) return 70;
-      
       return 0;
     }
 
@@ -982,7 +1068,12 @@
     function isEngineerOrManagement(postTitle) {
       if (!postTitle) return false;
       
-      for (let pattern of [...engineerPatterns, ...directorPatterns, ...managementPatterns]) {
+      const allPatterns = [
+        ...cePatterns, ...sePatterns, ...ePatterns, ...aePatterns,
+        ...directorPatterns, ...chiefManagementPatterns
+      ];
+      
+      for (let pattern of allPatterns) {
         if (pattern.test(postTitle)) return true;
       }
       
@@ -993,35 +1084,47 @@
     function getRankCategory(postTitle) {
       if (!postTitle) return null;
       
-      for (let pattern of engineerPatterns) {
-        if (pattern.test(postTitle)) return 'engineer';
+      // Check specific engineer ranks first
+      for (let pattern of cePatterns) {
+        if (pattern.test(postTitle)) return 'ce';
+      }
+      
+      for (let pattern of sePatterns) {
+        if (pattern.test(postTitle)) return 'se';
+      }
+      
+      for (let pattern of ePatterns) {
+        if (pattern.test(postTitle)) return 'e';
+      }
+      
+      for (let pattern of aePatterns) {
+        if (pattern.test(postTitle)) return 'ae';
       }
       
       for (let pattern of directorPatterns) {
         if (pattern.test(postTitle)) return 'director';
       }
       
-      for (let pattern of managementPatterns) {
+      for (let pattern of chiefManagementPatterns) {
         if (pattern.test(postTitle)) return 'chief';
       }
       
       return null;
     }
 
-    // Find duplicate groups
+    // Find exact duplicate names only
     function findDuplicateGroups() {
       duplicateGroups.clear();
       const nameMap = new Map();
       
-      // Group by similar names
+      // Group by exact normalized names only
       allStaff.forEach(staff => {
         const normalized = normalizeName(staff.fullName);
-        const baseKey = normalized.split(/[\s-]+/).slice(0, 2).join(' ');
         
-        if (!nameMap.has(baseKey)) {
-          nameMap.set(baseKey, []);
+        if (!nameMap.has(normalized)) {
+          nameMap.set(normalized, []);
         }
-        nameMap.get(baseKey).push(staff);
+        nameMap.get(normalized).push(staff);
       });
       
       // Keep only groups with multiple people
@@ -1030,24 +1133,6 @@
           duplicateGroups.set(key, group);
         }
       });
-    }
-
-    // Load manual matches from localStorage
-    function loadManualMatches() {
-      const saved = localStorage.getItem('cedd_manual_matches');
-      if (saved) {
-        try {
-          const matches = JSON.parse(saved);
-          manualMatches = new Map(matches);
-        } catch (e) {
-          manualMatches = new Map();
-        }
-      }
-    }
-
-    // Save manual matches to localStorage
-    function saveManualMatches() {
-      localStorage.setItem('cedd_manual_matches', JSON.stringify([...manualMatches]));
     }
 
     // Toggle rank filter
@@ -1062,7 +1147,6 @@
         }
       }
       
-      // Update button states
       updateRankFilterButtons();
       applyFilters();
     }
@@ -1071,17 +1155,24 @@
     function updateRankFilterButtons() {
       const buttons = document.querySelectorAll('.rank-filter-btn');
       buttons.forEach(btn => {
-        const category = btn.textContent.toLowerCase();
-        if (category === 'show all') {
-          btn.classList.toggle('active', activeRankFilters.size === 0);
-        } else if (category === 'engineers') {
-          btn.classList.toggle('active', activeRankFilters.has('engineer'));
-        } else if (category === 'directors') {
-          btn.classList.toggle('active', activeRankFilters.has('director'));
-        } else if (category === 'chiefs/heads') {
-          btn.classList.toggle('active', activeRankFilters.has('chief'));
-        }
+        btn.classList.remove('active');
       });
+      
+      if (activeRankFilters.size === 0) {
+        buttons.forEach(btn => {
+          if (btn.textContent === 'Show All') {
+            btn.classList.add('active');
+          }
+        });
+      } else {
+        activeRankFilters.forEach(filter => {
+          buttons.forEach(btn => {
+            if (btn.classList.contains(filter)) {
+              btn.classList.add('active');
+            }
+          });
+        });
+      }
     }
 
     // Apply filters
@@ -1219,24 +1310,28 @@
             const category = getRankCategory(staff.postTitle);
             
             let rankBadge = '';
-            if (category === 'engineer') {
-              rankBadge = '<span class="rank-badge engineer-badge">ENG</span>';
+            if (category === 'ce') {
+              rankBadge = '<span class="rank-badge ce-badge">CE</span>';
+            } else if (category === 'se') {
+              rankBadge = '<span class="rank-badge se-badge">SE</span>';
+            } else if (category === 'e') {
+              rankBadge = '<span class="rank-badge e-badge">E</span>';
+            } else if (category === 'ae') {
+              rankBadge = '<span class="rank-badge ae-badge">AE</span>';
             } else if (category === 'director') {
               rankBadge = '<span class="rank-badge director-badge">DIR</span>';
             } else if (category === 'chief') {
               rankBadge = '<span class="rank-badge chief-badge">CHIEF</span>';
             }
             
-            // Check for duplicates
+            // Check for exact duplicates only
             const normalized = normalizeName(staff.fullName);
-            const isDuplicate = Array.from(duplicateGroups.values()).some(group => 
-              group.some(s => s.id === staff.id && group.length > 1)
-            );
+            const isDuplicate = duplicateGroups.has(normalized) && duplicateGroups.get(normalized).length > 1;
             
             html += `
-              <div class="staff-item" onclick="viewStaffDetails('${staff.id}')">
+              <div class="staff-item">
                 <div class="staff-number">${globalIndex++}</div>
-                <div class="staff-name">
+                <div class="staff-name" onclick="viewStaffDetails('${staff.id}')">
                   ${displayName}
                   ${rankBadge}
                   ${isDuplicate ? '<span class="duplicate-indicator">DUP</span>' : ''}
@@ -1249,11 +1344,8 @@
                     '-'
                   }
                 </div>
-                <div class="staff-actions" onclick="event.stopPropagation()">
-                  ${isDuplicate ? 
-                    `<button class="action-btn match" onclick="manageDuplicate('${staff.id}')">Manage</button>` : 
-                    ''
-                  }
+                <div class="staff-actions">
+                  <button class="action-btn edit" onclick="editStaff('${staff.id}', event)">Edit</button>
                 </div>
               </div>
             `;
@@ -1272,111 +1364,123 @@
       container.innerHTML = html;
     }
 
-    // Manage duplicate
-    function manageDuplicate(staffId) {
+    // Edit staff
+    function editStaff(staffId, event) {
+      event.stopPropagation();
+      
       const staff = allStaff.find(s => s.id === staffId);
       if (!staff) return;
       
-      const normalized = normalizeName(staff.fullName);
-      let duplicateGroup = null;
+      const modal = document.getElementById('editModal');
+      const modalBody = document.getElementById('editModalBody');
       
-      // Find the duplicate group
-      duplicateGroups.forEach((group, key) => {
-        if (group.some(s => s.id === staffId)) {
-          duplicateGroup = group;
-        }
-      });
-      
-      if (!duplicateGroup) return;
-      
-      const modal = document.getElementById('duplicateModal');
-      const modalBody = document.getElementById('duplicateModalBody');
-      
-      let html = `
-        <h3>Potential Duplicates for: ${removeTitle(staff.fullName)}</h3>
-        <p style="color: #666; margin-bottom: 20px;">Select staff members that are the same person:</p>
-        
-        <div class="duplicate-list">
-      `;
-      
-      duplicateGroup.forEach(s => {
-        const isSelected = manualMatches.get(s.id) === staff.id || s.id === staff.id;
-        
-        html += `
-          <div class="duplicate-item ${isSelected ? 'selected' : ''}" onclick="toggleDuplicateSelection('${s.id}', '${staff.id}')">
-            <div><strong>${removeTitle(s.fullName)}</strong></div>
-            <div style="color: #666; font-size: 14px;">${s.postTitle}</div>
-            <div style="color: #666; font-size: 14px;">${s.department} - ${s.office || 'No Office'}</div>
-            <div style="color: #666; font-size: 14px;">Tel: ${s.officeTel || 'N/A'}</div>
+      modalBody.innerHTML = `
+        <form class="edit-form" onsubmit="saveStaffEdit('${staffId}', event)">
+          <div>
+            <label>Full Name (with title):</label>
+            <input type="text" id="editFullName" value="${staff.fullName || ''}" required>
           </div>
-        `;
-      });
-      
-      html += `
-        </div>
+          
+          <div>
+            <label>Post Title:</label>
+            <input type="text" id="editPostTitle" value="${staff.postTitle || ''}" required>
+          </div>
+          
+          <div>
+            <label>Department:</label>
+            <input type="text" id="editDepartment" value="${staff.department || ''}" required>
+          </div>
+          
+          <div>
+            <label>Office:</label>
+            <input type="text" id="editOffice" value="${staff.office || ''}">
+          </div>
+          
+          <div>
+            <label>Office Tel:</label>
+            <input type="text" id="editOfficeTel" value="${staff.officeTel || ''}">
+          </div>
+          
+          <div class="edit-actions">
+            <button type="submit" class="btn-success">Save Changes</button>
+            <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+            <button type="button" class="btn-danger" onclick="deleteStaff('${staffId}')">Delete</button>
+          </div>
+        </form>
         
-        <div class="duplicate-actions">
-          <button class="btn-success" onclick="saveDuplicateMatches('${staff.id}')">Save Matches</button>
-          <button class="btn-secondary" onclick="closeDuplicateModal()">Cancel</button>
-        </div>
+        <div id="editStatus" class="status" style="display: none;"></div>
       `;
       
-      modalBody.innerHTML = html;
       modal.style.display = 'block';
     }
 
-    // Toggle duplicate selection
-    function toggleDuplicateSelection(targetId, baseId) {
-      const items = document.querySelectorAll('.duplicate-item');
-      items.forEach(item => {
-        if (item.textContent.includes(targetId)) {
-          item.classList.toggle('selected');
-        }
-      });
-    }
-
-    // Save duplicate matches
-    function saveDuplicateMatches(baseId) {
-      const selected = document.querySelectorAll('.duplicate-item.selected');
+    // Save staff edit
+    async function saveStaffEdit(staffId, event) {
+      event.preventDefault();
       
-      // Clear previous matches for this group
-      const staff = allStaff.find(s => s.id === baseId);
-      const normalized = normalizeName(staff.fullName);
+      const fullName = document.getElementById('editFullName').value;
+      const postTitle = document.getElementById('editPostTitle').value;
+      const department = document.getElementById('editDepartment').value;
+      const office = document.getElementById('editOffice').value;
+      const officeTel = document.getElementById('editOfficeTel').value;
       
-      duplicateGroups.forEach((group) => {
-        group.forEach(s => {
-          if (manualMatches.get(s.id) === baseId) {
-            manualMatches.delete(s.id);
-          }
+      const status = document.getElementById('editStatus');
+      status.innerHTML = '<span class="loader"></span> Saving changes...';
+      status.className = 'status info';
+      status.style.display = 'block';
+      
+      try {
+        await db.collection('staff').doc(staffId).update({
+          fullName,
+          postTitle,
+          department,
+          office,
+          officeTel,
+          displayName: removeTitle(fullName),
+          normalizedName: normalizeName(fullName),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-      });
-      
-      // Set new matches
-      selected.forEach(item => {
-        const staffInfo = item.textContent;
-        const matchedStaff = allStaff.find(s => 
-          staffInfo.includes(removeTitle(s.fullName)) && 
-          staffInfo.includes(s.postTitle)
-        );
         
-        if (matchedStaff && matchedStaff.id !== baseId) {
-          manualMatches.set(matchedStaff.id, baseId);
-        }
-      });
-      
-      saveManualMatches();
-      closeDuplicateModal();
-      
-      // Refresh display
-      matchStaffWithPostings();
-      updateStatistics();
-      displayGroupedStaff();
-      
-      showStatus(document.getElementById('csvStatus'), 'success', '✅ Duplicate matches saved successfully');
+        showStatus(status, 'success', '✅ Changes saved successfully');
+        
+        setTimeout(() => {
+          closeEditModal();
+          loadAllData();
+        }, 1500);
+        
+      } catch (error) {
+        showStatus(status, 'error', `❌ Error: ${error.message}`);
+      }
     }
 
-    // Display duplicates management page
-    function displayDuplicatesManagement() {
+    // Delete staff
+    async function deleteStaff(staffId) {
+      if (!confirm('Are you sure you want to delete this staff member? This cannot be undone.')) {
+        return;
+      }
+      
+      const status = document.getElementById('editStatus');
+      status.innerHTML = '<span class="loader"></span> Deleting...';
+      status.className = 'status info';
+      status.style.display = 'block';
+      
+      try {
+        await db.collection('staff').doc(staffId).delete();
+        
+        showStatus(status, 'success', '✅ Staff member deleted');
+        
+        setTimeout(() => {
+          closeEditModal();
+          loadAllData();
+        }, 1500);
+        
+      } catch (error) {
+        showStatus(status, 'error', `❌ Error: ${error.message}`);
+      }
+    }
+
+    // Display duplicates
+    function displayDuplicates() {
       const container = document.getElementById('duplicatesContent');
       
       if (duplicateGroups.size === 0) {
@@ -1385,54 +1489,35 @@
       }
       
       let html = '<div style="margin-bottom: 20px;">';
-      html += `<p>Found ${duplicateGroups.size} groups of potential duplicate names. Click on a group to manage matches.</p>`;
+      html += `<p>Found ${duplicateGroups.size} exact duplicate names. These are different people with the same name.</p>`;
       html += '</div>';
       
-      duplicateGroups.forEach((group, key) => {
+      duplicateGroups.forEach((group, name) => {
         html += `
-          <div class="department-group" style="margin-bottom: 20px;">
-            <div class="office-header" style="cursor: pointer;" onclick="expandDuplicateGroup('${key}')">
-              <span>Potential Duplicates: ${key}</span>
-              <span class="office-count">${group.length} people</span>
-            </div>
-            <div id="dupGroup_${key}" style="display: none; padding: 15px;">
+          <div class="duplicate-group">
+            <h4>Name: ${name} (${group.length} people)</h4>
         `;
         
         group.forEach(staff => {
-          const mainId = manualMatches.get(staff.id);
-          const isLinked = mainId && mainId !== staff.id;
-          
           html += `
-            <div style="padding: 10px; border-bottom: 1px solid #e0e0e0;">
-              <div><strong>${removeTitle(staff.fullName)}</strong> ${isLinked ? '(Linked)' : ''}</div>
-              <div style="color: #666; font-size: 14px;">${staff.postTitle}</div>
-              <div style="color: #666; font-size: 14px;">${staff.department} - ${staff.office || 'No Office'}</div>
-              <button class="action-btn match" onclick="manageDuplicate('${staff.id}')" style="margin-top: 5px;">
-                Manage Matches
-              </button>
+            <div class="duplicate-item">
+              <strong>${staff.fullName}</strong><br>
+              ${staff.postTitle} - ${staff.department}<br>
+              ${staff.office || 'No Office'} | Tel: ${staff.officeTel || 'N/A'}
             </div>
           `;
         });
         
-        html += '</div></div>';
+        html += '</div>';
       });
       
       container.innerHTML = html;
-    }
-
-    // Expand duplicate group
-    function expandDuplicateGroup(key) {
-      const element = document.getElementById(`dupGroup_${key}`);
-      if (element) {
-        element.style.display = element.style.display === 'none' ? 'block' : 'none';
-      }
     }
 
     // Load all data
     async function loadAllData() {
       await loadStaffData();
       await loadPostingsData();
-      loadManualMatches();
       findDuplicateGroups();
       matchStaffWithPostings();
       updateStatistics();
@@ -1451,7 +1536,7 @@
           allStaff.push({ 
             id: doc.id, 
             ...data,
-            displayName: removeTitle(data.fullName)
+            displayName: data.displayName || removeTitle(data.fullName)
           });
         });
         
@@ -1481,34 +1566,17 @@
     function matchStaffWithPostings() {
       staffPostingsMap.clear();
       
-      // Consider manual matches
       allPostings.forEach(posting => {
-        let matched = false;
+        const postingNormalized = normalizeName(posting.name);
         
         allStaff.forEach(staff => {
           const staffNormalized = normalizeName(staff.fullName);
-          const postingNormalized = normalizeName(posting.name);
           
-          // Check direct match
           if (staffNormalized === postingNormalized) {
             if (!staffPostingsMap.has(staff.id)) {
               staffPostingsMap.set(staff.id, []);
             }
             staffPostingsMap.get(staff.id).push(posting);
-            matched = true;
-          }
-          
-          // Check manual match
-          const mainId = manualMatches.get(staff.id);
-          if (mainId) {
-            const mainStaff = allStaff.find(s => s.id === mainId);
-            if (mainStaff && normalizeName(mainStaff.fullName) === postingNormalized) {
-              if (!staffPostingsMap.has(staff.id)) {
-                staffPostingsMap.set(staff.id, []);
-              }
-              staffPostingsMap.get(staff.id).push(posting);
-              matched = true;
-            }
           }
         });
       });
@@ -1516,7 +1584,6 @@
 
     // Populate filter dropdowns
     function populateFilters() {
-      // Populate departments
       const departments = new Set();
       const offices = new Set();
       
@@ -1549,7 +1616,7 @@
         if (!isEngineerOrManagement(staff.postTitle)) return;
         
         const category = getRankCategory(staff.postTitle);
-        if (category === 'engineer') engineerCount++;
+        if (['ce', 'se', 'e', 'ae'].includes(category)) engineerCount++;
         else if (category === 'director') directorCount++;
         else if (category === 'chief') chiefCount++;
         
@@ -1599,6 +1666,10 @@
               <strong>Office Tel:</strong> ${staff.officeTel || 'N/A'}
             </div>
           </div>
+          
+          <div style="margin-top: 20px;">
+            <button class="action-btn edit" onclick="editStaff('${staffId}', event)">Edit Information</button>
+          </div>
         </div>
       `;
       
@@ -1643,8 +1714,8 @@
       document.getElementById('staffModal').style.display = 'none';
     }
 
-    function closeDuplicateModal() {
-      document.getElementById('duplicateModal').style.display = 'none';
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
     }
 
     // Switch tabs
@@ -1660,7 +1731,7 @@
       document.getElementById(tabName + 'Tab').classList.add('active');
       
       if (tabName === 'duplicates') {
-        displayDuplicatesManagement();
+        displayDuplicates();
       }
     }
 
@@ -1852,9 +1923,10 @@
     function showStatus(element, type, message) {
       element.textContent = message;
       element.className = `status ${type}`;
+      element.style.display = 'block';
       
       setTimeout(() => {
-        element.className = 'status';
+        element.style.display = 'none';
       }, 5000);
     }
 
