@@ -205,6 +205,7 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .search-input {
@@ -234,6 +235,17 @@
       width: 18px;
       height: 18px;
       cursor: pointer;
+    }
+
+    /* Info Message */
+    .info-message {
+      background: #d1ecf1;
+      color: #0c5460;
+      padding: 12px 20px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      border: 1px solid #bee5eb;
+      font-size: 14px;
     }
 
     /* Table */
@@ -272,7 +284,30 @@
       background: #fafbfc;
     }
 
-    /* Posting Badge */
+    /* Badges */
+    .rank-badge {
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    .engineer-badge {
+      background: #9b59b6;
+      color: white;
+    }
+
+    .director-badge {
+      background: #f39c12;
+      color: white;
+    }
+
+    .chief-badge {
+      background: #e74c3c;
+      color: white;
+    }
+
     .posting-badge {
       background: #e74c3c;
       color: white;
@@ -290,6 +325,16 @@
       border-radius: 12px;
       font-size: 11px;
       font-weight: 600;
+    }
+
+    .duplicate-indicator {
+      background: #f39c12;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 4px;
     }
 
     /* Pagination */
@@ -512,38 +557,34 @@
   <div class="header">
     <div class="header-content">
       <h1>📋 CEDD Staff Management System</h1>
-      <p>Manage staff records and posting notices efficiently</p>
+      <p>Engineers and Management Directory</p>
     </div>
   </div>
 
   <div class="container">
     <!-- Statistics Dashboard -->
     <div class="stats-grid" id="statsGrid">
-      <div class="stat-card">
-        <h3 id="totalStaff">0</h3>
-        <p>Total Staff</p>
-      </div>
       <div class="stat-card purple">
-        <h3 id="totalDepartments">0</h3>
-        <p>Departments</p>
-      </div>
-      <div class="stat-card green">
-        <h3 id="totalOffices">0</h3>
-        <p>Offices</p>
+        <h3 id="totalEngineers">0</h3>
+        <p>Total Engineers</p>
       </div>
       <div class="stat-card orange">
-        <h3 id="totalPostings">0</h3>
-        <p>Posting Notices</p>
+        <h3 id="totalDirectors">0</h3>
+        <p>Directors</p>
       </div>
       <div class="stat-card red">
-        <h3 id="staffWithPostings">0</h3>
-        <p>Staff with Postings</p>
+        <h3 id="totalChiefs">0</h3>
+        <p>Chiefs/Heads</p>
+      </div>
+      <div class="stat-card green">
+        <h3 id="totalWithPostings">0</h3>
+        <p>With Postings</p>
       </div>
     </div>
 
     <!-- Tabs -->
     <div class="tabs">
-      <button class="tab-button active" onclick="switchTab('staff')">Staff List</button>
+      <button class="tab-button active" onclick="switchTab('staff')">Staff Directory</button>
       <button class="tab-button" onclick="switchTab('upload')">Upload Data</button>
       <button class="tab-button" onclick="switchTab('postings')">Posting Notices</button>
     </div>
@@ -551,7 +592,11 @@
     <!-- Staff List Tab -->
     <div id="staffTab" class="tab-content active">
       <div class="card">
-        <h2>👥 Staff Directory</h2>
+        <h2>👷 Engineers & Management Directory</h2>
+        
+        <div class="info-message">
+          Showing only Engineers (CE/SE/E/AE) and Management (Directors, Chiefs, Heads, and other senior positions)
+        </div>
         
         <div class="search-container">
           <input 
@@ -565,19 +610,23 @@
             <input type="checkbox" id="showPostingsOnly" onchange="performSearch()">
             <label for="showPostingsOnly">Show only staff with postings</label>
           </div>
+          <div class="filter-checkbox">
+            <input type="checkbox" id="showAllStaff" onchange="performSearch()">
+            <label for="showAllStaff">Show all staff (not just engineers/management)</label>
+          </div>
         </div>
 
         <div class="table-container">
           <table id="staffTable">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Full Name</th>
-                <th>Post Title</th>
-                <th>Department</th>
-                <th>Office</th>
-                <th>Office Tel</th>
-                <th>Postings</th>
+                <th width="5%">#</th>
+                <th width="20%">Name</th>
+                <th width="25%">Post Title</th>
+                <th width="15%">Department</th>
+                <th width="15%">Office</th>
+                <th width="10%">Tel</th>
+                <th width="10%">Postings</th>
               </tr>
             </thead>
             <tbody id="staffTableBody">
@@ -707,35 +756,70 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
     let allStaff = [];
     let filteredStaff = [];
     let allPostings = [];
-    let staffPostingsMap = new Map(); // Map to store staff->postings relationships
+    let staffPostingsMap = new Map();
+    let duplicateNamesMap = new Map(); // Track duplicate names
     let currentPage = 1;
-    const rowsPerPage = 50;
+    const rowsPerPage = 200; // Increased from 50
+
+    // Define engineer and management patterns
+    const engineerPatterns = [
+      /^Chief Engineer/i, /^CE\b/i,
+      /^Senior Engineer/i, /^SE\b/i,
+      /^Engineer(?!\s*Specialist)/i, /^E\b/i, /^Engr\b/i,
+      /^Assistant Engineer/i, /^AE\b/i,
+      /Geo(?:technical)?\s*Engr/i, /^Sr\s*Geo\s*Engr/i,
+      /^Ch\s*Geo\s*Engr/i, /^Asst\s*Geo\s*Engr/i
+    ];
+
+    const directorPatterns = [
+      /^Director/i, /^Dir\b/i, /^D\b/i,
+      /^Deputy Director/i, /^Dep\s*Dir/i, /^DD\b/i,
+      /^Assistant Director/i, /^Asst\s*Dir/i, /^AD\b/i
+    ];
+
+    const managementPatterns = [
+      /^Head\s+of/i, /^Dep\s*Head/i,
+      /^Chief/i, /^Ch\b/i,
+      /^Principal/i, /^Prin\b/i,
+      /Project\s*Manager/i, /^PM\b/i,
+      /Project\s*Team\s*Leader/i,
+      /Commissioner/i, /Comr\./i,
+      /Secretary/i,
+      /Manager/i
+    ];
 
     // Initialize app
     document.addEventListener('DOMContentLoaded', async () => {
       await loadAllData();
     });
 
+    // Remove title from name for display
+    function removeTitle(name) {
+      if (!name) return '';
+      
+      // Remove common titles
+      const titles = ['Mr\\.?', 'Ms\\.?', 'Miss\\.?', 'Mrs\\.?', 'Dr\\.?', 'Prof\\.?'];
+      let cleanName = name;
+      
+      titles.forEach(title => {
+        const regex = new RegExp(`^${title}\\s+`, 'i');
+        cleanName = cleanName.replace(regex, '');
+      });
+      
+      return cleanName.trim();
+    }
+
     // Normalize name for matching
     function normalizeName(name) {
       if (!name) return '';
       
-      // Remove titles (Mr., Ms., Miss, Mrs., Dr., Prof.)
-      const titles = ['Mr\\.?', 'Ms\\.?', 'Miss\\.?', 'Mrs\\.?', 'Dr\\.?', 'Prof\\.?'];
-      let normalized = name;
-      
-      titles.forEach(title => {
-        const regex = new RegExp(`^${title}\\s+`, 'i');
-        normalized = normalized.replace(regex, '');
-      });
-      
-      // Convert to uppercase for comparison
-      normalized = normalized.toUpperCase();
+      // Remove titles and convert to uppercase
+      let normalized = removeTitle(name).toUpperCase();
       
       // Remove extra spaces and normalize spaces/hyphens
       normalized = normalized
-        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-        .replace(/\s*-\s*/g, '-') // Normalize hyphens
+        .replace(/\s+/g, ' ')
+        .replace(/\s*-\s*/g, '-')
         .trim();
       
       // Extract core name (remove titles like JP, BBS, etc.)
@@ -776,6 +860,71 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
       return Array.from(variations);
     }
 
+    // Check if position is engineer or management
+    function isEngineerOrManagement(postTitle) {
+      if (!postTitle) return false;
+      
+      // Check engineer patterns
+      for (let pattern of engineerPatterns) {
+        if (pattern.test(postTitle)) return true;
+      }
+      
+      // Check director patterns
+      for (let pattern of directorPatterns) {
+        if (pattern.test(postTitle)) return true;
+      }
+      
+      // Check management patterns
+      for (let pattern of managementPatterns) {
+        if (pattern.test(postTitle)) return true;
+      }
+      
+      return false;
+    }
+
+    // Get rank category
+    function getRankCategory(postTitle) {
+      if (!postTitle) return null;
+      
+      for (let pattern of engineerPatterns) {
+        if (pattern.test(postTitle)) return 'engineer';
+      }
+      
+      for (let pattern of directorPatterns) {
+        if (pattern.test(postTitle)) return 'director';
+      }
+      
+      for (let pattern of managementPatterns) {
+        if (pattern.test(postTitle)) return 'chief';
+      }
+      
+      return null;
+    }
+
+    // Track duplicate names
+    function trackDuplicateNames() {
+      duplicateNamesMap.clear();
+      const nameCount = new Map();
+      
+      // Count occurrences of each normalized name
+      allStaff.forEach(staff => {
+        const normalized = normalizeName(staff.fullName);
+        if (!nameCount.has(normalized)) {
+          nameCount.set(normalized, []);
+        }
+        nameCount.get(normalized).push(staff);
+      });
+      
+      // Mark duplicates
+      nameCount.forEach((staffList, name) => {
+        if (staffList.length > 1) {
+          staffList.forEach((staff, index) => {
+            duplicateNamesMap.set(staff.id, index + 1);
+          });
+        }
+      });
+    }
+
     // Match staff with postings
     function matchStaffWithPostings() {
       staffPostingsMap.clear();
@@ -809,15 +958,13 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
           }
         }
       });
-      
-      // Update statistics
-      document.getElementById('staffWithPostings').textContent = staffPostingsMap.size;
     }
 
     // Load all data
     async function loadAllData() {
       await loadStaffData();
       await loadPostingsData();
+      trackDuplicateNames();
       matchStaffWithPostings();
       updateStatistics();
     }
@@ -862,17 +1009,26 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
 
     // Update statistics
     function updateStatistics() {
-      document.getElementById('totalStaff').textContent = allStaff.length;
+      let engineerCount = 0;
+      let directorCount = 0;
+      let chiefCount = 0;
+      let withPostingsCount = 0;
       
-      // Count unique departments
-      const departments = new Set(allStaff.map(s => s.department).filter(d => d));
-      document.getElementById('totalDepartments').textContent = departments.size;
+      allStaff.forEach(staff => {
+        const category = getRankCategory(staff.postTitle);
+        if (category === 'engineer') engineerCount++;
+        else if (category === 'director') directorCount++;
+        else if (category === 'chief') chiefCount++;
+        
+        if (staffPostingsMap.has(staff.id)) {
+          withPostingsCount++;
+        }
+      });
       
-      // Count unique offices
-      const offices = new Set(allStaff.map(s => s.office).filter(o => o));
-      document.getElementById('totalOffices').textContent = offices.size;
-      
-      document.getElementById('totalPostings').textContent = allPostings.length;
+      document.getElementById('totalEngineers').textContent = engineerCount;
+      document.getElementById('totalDirectors').textContent = directorCount;
+      document.getElementById('totalChiefs').textContent = chiefCount;
+      document.getElementById('totalWithPostings').textContent = withPostingsCount;
     }
 
     // Improved CSV parser that handles quoted fields with commas
@@ -953,8 +1109,6 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
             throw new Error('No data found in CSV file');
           }
           
-          console.log('Parsed CSV data sample:', csvData[0]); // Debug log
-          
           // Map CSV columns to Firestore fields
           const staffData = csvData.map(row => ({
             department: row['Department'] || '',
@@ -963,6 +1117,7 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
             postTitle: row['Post Title'] || '',
             officeTel: row['Office Tel'] || '',
             normalizedName: normalizeName(row['Full Name'] || ''),
+            displayName: removeTitle(row['Full Name'] || ''),
             uploadedAt: firebase.firestore.FieldValue.serverTimestamp()
           }));
           
@@ -1029,7 +1184,13 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
           // Ensure normalizedName exists
           if (!data.normalizedName || data.normalizedName === 'undefined') {
             needsFix = true;
-            fixedData.normalizedName = normalizeName(fixedData.fullName || '');
+            fixedData.normalizedName = normalizeName(fixedData.fullName || data.fullName || '');
+          }
+          
+          // Add displayName
+          if (!data.displayName) {
+            needsFix = true;
+            fixedData.displayName = removeTitle(fixedData.fullName || data.fullName || '');
           }
           
           if (needsFix) {
@@ -1130,32 +1291,55 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
     // Display staff in table
     function displayStaff() {
       const tbody = document.getElementById('staffTableBody');
+      const showAllStaff = document.getElementById('showAllStaff').checked;
       
-      if (filteredStaff.length === 0) {
+      // Filter to show only engineers and management unless checkbox is checked
+      let displayData = filteredStaff;
+      if (!showAllStaff) {
+        displayData = filteredStaff.filter(staff => isEngineerOrManagement(staff.postTitle));
+      }
+      
+      if (displayData.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="no-results">No staff data found.</td></tr>';
-        updatePagination();
+        updatePagination(displayData.length);
         return;
       }
       
       const startIndex = (currentPage - 1) * rowsPerPage;
       const endIndex = startIndex + rowsPerPage;
-      const pageData = filteredStaff.slice(startIndex, endIndex);
+      const pageData = displayData.slice(startIndex, endIndex);
       
       tbody.innerHTML = pageData.map((staff, index) => {
         const postings = staffPostingsMap.get(staff.id) || [];
         const postingCount = postings.length;
         
-        // Handle undefined values
-        const fullName = staff.fullName || 'Unknown';
+        // Get display name without title
+        const displayName = staff.displayName || removeTitle(staff.fullName) || 'Unknown';
         const postTitle = staff.postTitle || 'Unknown';
         const department = staff.department || 'Unknown';
         const office = staff.office || '-';
         const officeTel = staff.officeTel || '-';
         
+        // Check for duplicate name
+        const duplicateNumber = duplicateNamesMap.get(staff.id);
+        const duplicateIndicator = duplicateNumber ? 
+          `<span class="duplicate-indicator">#${duplicateNumber}</span>` : '';
+        
+        // Get rank badge
+        const category = getRankCategory(postTitle);
+        let rankBadge = '';
+        if (category === 'engineer') {
+          rankBadge = '<span class="rank-badge engineer-badge">ENG</span>';
+        } else if (category === 'director') {
+          rankBadge = '<span class="rank-badge director-badge">DIR</span>';
+        } else if (category === 'chief') {
+          rankBadge = '<span class="rank-badge chief-badge">CHIEF</span>';
+        }
+        
         return `
           <tr onclick="viewStaffDetails('${staff.id}')" style="cursor: pointer;">
             <td>${startIndex + index + 1}</td>
-            <td>${fullName}</td>
+            <td>${displayName}${duplicateIndicator}${rankBadge}</td>
             <td>${postTitle}</td>
             <td>${department}</td>
             <td>${office}</td>
@@ -1170,7 +1354,7 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
         `;
       }).join('');
       
-      updatePagination();
+      updatePagination(displayData.length);
     }
 
     // Display postings
@@ -1197,7 +1381,10 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
           );
           
           if (hasMatch) {
-            staffMatch = `<span class="posting-match">✓ ${staff.fullName}</span>`;
+            const displayName = staff.displayName || removeTitle(staff.fullName);
+            const duplicateNumber = duplicateNamesMap.get(staff.id);
+            const duplicateIndicator = duplicateNumber ? ` #${duplicateNumber}` : '';
+            staffMatch = `<span class="posting-match">✓ ${displayName}${duplicateIndicator}</span>`;
             break;
           }
         }
@@ -1227,14 +1414,21 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
       const modalTitle = document.getElementById('modalTitle');
       const modalBody = document.getElementById('modalBody');
       
-      modalTitle.textContent = `Staff Details: ${staff.fullName || 'Unknown'}`;
+      const displayName = staff.displayName || removeTitle(staff.fullName) || 'Unknown';
+      const duplicateNumber = duplicateNamesMap.get(staff.id);
+      const duplicateNote = duplicateNumber ? ` (Instance #${duplicateNumber})` : '';
+      
+      modalTitle.textContent = `Staff Details: ${displayName}${duplicateNote}`;
       
       let html = `
         <div style="margin-bottom: 20px;">
           <h3 style="color: #2c3e50; margin-bottom: 15px;">Basic Information</h3>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
             <div>
-              <strong>Full Name:</strong> ${staff.fullName || 'Unknown'}
+              <strong>Full Name (in system):</strong> ${staff.fullName || 'Unknown'}
+            </div>
+            <div>
+              <strong>Display Name:</strong> ${displayName}
             </div>
             <div>
               <strong>Post Title:</strong> ${staff.postTitle || 'Unknown'}
@@ -1248,12 +1442,17 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
             <div>
               <strong>Office Tel:</strong> ${staff.officeTel || 'N/A'}
             </div>
-            <div>
-              <strong>Normalized Name:</strong> ${normalizeName(staff.fullName)}
-            </div>
           </div>
         </div>
       `;
+      
+      if (duplicateNumber) {
+        html += `
+          <div style="background: #fff3cd; padding: 10px; border-radius: 6px; margin-bottom: 20px;">
+            <strong>⚠️ Note:</strong> There are multiple staff members with similar names. This is instance #${duplicateNumber}.
+          </div>
+        `;
+      }
       
       if (postings.length > 0) {
         html += `
@@ -1302,6 +1501,7 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
     function performSearch() {
       const searchTerm = document.getElementById('searchInput').value.toLowerCase();
       const showPostingsOnly = document.getElementById('showPostingsOnly').checked;
+      const showAllStaff = document.getElementById('showAllStaff').checked;
       
       if (!searchTerm && !showPostingsOnly) {
         filteredStaff = [...allStaff];
@@ -1318,8 +1518,11 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
             return true;
           }
           
+          // Search in display name (without title)
+          const displayName = staff.displayName || removeTitle(staff.fullName) || '';
+          
           return (
-            (staff.fullName && staff.fullName.toLowerCase().includes(searchTerm)) ||
+            displayName.toLowerCase().includes(searchTerm) ||
             (staff.postTitle && staff.postTitle.toLowerCase().includes(searchTerm)) ||
             (staff.department && staff.department.toLowerCase().includes(searchTerm)) ||
             (staff.office && staff.office.toLowerCase().includes(searchTerm))
@@ -1332,8 +1535,8 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
     }
 
     // Pagination
-    function updatePagination() {
-      const totalPages = Math.ceil(filteredStaff.length / rowsPerPage);
+    function updatePagination(totalItems) {
+      const totalPages = Math.ceil(totalItems / rowsPerPage);
       
       document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
       document.getElementById('prevBtn').disabled = currentPage === 1;
@@ -1348,7 +1551,10 @@ Civil Engineering and Development Department,,"Mr. FONG Hok Shing, Michael, JP",
     }
 
     function nextPage() {
-      const totalPages = Math.ceil(filteredStaff.length / rowsPerPage);
+      const showAllStaff = document.getElementById('showAllStaff').checked;
+      const displayData = showAllStaff ? filteredStaff : filteredStaff.filter(staff => isEngineerOrManagement(staff.postTitle));
+      const totalPages = Math.ceil(displayData.length / rowsPerPage);
+      
       if (currentPage < totalPages) {
         currentPage++;
         displayStaff();
