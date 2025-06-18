@@ -2377,190 +2377,188 @@
       result.push(current);
       return result;
     }
-
-    // Upload CSV with history tracking
-    async function uploadCSV() {
-      const fileInput = document.getElementById('csvFile');
-      const status = document.getElementById('csvStatus');
+// Upload CSV with history tracking
+async function uploadCSV() {
+  const fileInput = document.getElementById('csvFile');
+  const status = document.getElementById('csvStatus');
+  
+  if (!fileInput.files.length) {
+    showStatus(status, 'error', '❌ Please select a CSV file');
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  status.innerHTML = '<span class="loader"></span> Processing CSV file...';
+  status.className = 'status info';
+  
+  reader.onload = async (e) => {
+    try {
+      const csvData = parseCSV(e.target.result);
       
-      if (!fileInput.files.length) {
-        showStatus(status, 'error', '❌ Please select a CSV file');
-        return;
+      if (!csvData.length) {
+        throw new Error('No data found in CSV file');
       }
       
-      const file = fileInput.files[0];
-      const reader = new FileReader();
+      const uploadDate = new Date().toISOString();
+      const uploadId = `upload_${Date.now()}`;
       
-      status.innerHTML = '<span class="loader"></span> Processing CSV file...';
-      status.className = 'status info';
+      const existingStaffMap = new Map();
+      const snapshot = await db.collection('staff').get();
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        existingStaffMap.set(normalizeName(data.fullName), { id: doc.id, ...data });
+      });
       
-      reader.onload = async (e) => {
-        try {
-          const csvData = parseCSV(e.target.result);
+      const newStaff = [];
+      const updatedStaff = [];
+      const unchangedStaff = [];
+      const batch = db.batch();
+      
+      const staffData = csvData.map(row => {
+        // Split office field by comma
+        const officeField = row['Office'] || '';
+        const officeParts = officeField.split(',').map(part => part.trim());
+        const office = officeParts[0] || '';
+        const team = officeParts.length > 1 ? officeParts[1] : ''; // Fix: ensure team is never undefined
+        
+        return {
+          department: row['Department'] || '',
+          office: office,
+          team: team, // Now guaranteed to be a string, never undefined
+          fullName: row['Full Name'] || '',
+          postTitle: row['Post Title'] || '',
+          officeTel: row['Office Tel'] || '',
+          normalizedName: normalizeName(row['Full Name'] || ''),
+          displayName: removeTitle(row['Full Name'] || ''),
+          lastUploadDate: uploadDate,
+          uploadId: uploadId
+        };
+      });
+      
+      for (const staff of staffData) {
+        if (!staff.fullName || !staff.department) continue;
+        
+        const existing = existingStaffMap.get(staff.normalizedName);
+        
+        if (existing) {
+          const changed = 
+            existing.department !== staff.department ||
+            existing.office !== staff.office ||
+            (existing.team || '') !== staff.team || // Handle undefined team in existing data
+            existing.postTitle !== staff.postTitle ||
+            existing.officeTel !== staff.officeTel;
           
-          if (!csvData.length) {
-            throw new Error('No data found in CSV file');
-          }
-          
-          const uploadDate = new Date().toISOString();
-          const uploadId = `upload_${Date.now()}`;
-          
-          const existingStaffMap = new Map();
-          const snapshot = await db.collection('staff').get();
-          snapshot.forEach(doc => {
-            const data = doc.data();
-            existingStaffMap.set(normalizeName(data.fullName), { id: doc.id, ...data });
-          });
-          
-          const newStaff = [];
-          const updatedStaff = [];
-          const unchangedStaff = [];
-          const batch = db.batch();
-          
-          const staffData = csvData.map(row => {
-            // Split office field by comma
-            const officeField = row['Office'] || '';
-            const officeParts = officeField.split(',').map(part => part.trim());
-            const office = officeParts[0] || '';
-            const team = officeParts[1] || '';
-            
-            return {
-              department: row['Department'] || '',
-              office: office,
-              team: team,
-              fullName: row['Full Name'] || '',
-              postTitle: row['Post Title'] || '',
-              officeTel: row['Office Tel'] || '',
-              normalizedName: normalizeName(row['Full Name'] || ''),
-              displayName: removeTitle(row['Full Name'] || ''),
-              lastUploadDate: uploadDate,
-              uploadId: uploadId
-            };
-          });
-          
-          for (const staff of staffData) {
-            if (!staff.fullName || !staff.department) continue;
-            
-            const existing = existingStaffMap.get(staff.normalizedName);
-            
-            if (existing) {
-              const changed = 
-                existing.department !== staff.department ||
-                existing.office !== staff.office ||
-                existing.team !== staff.team ||
-                existing.postTitle !== staff.postTitle ||
-                existing.officeTel !== staff.officeTel;
-              
-              if (changed) {
-                const historyRef = db.collection('staffHistory').doc();
-                batch.set(historyRef, {
-                  staffId: existing.id,
-                  fullName: existing.fullName,
-                  department: existing.department,
-                  office: existing.office,
-                  team: existing.team,
-                  postTitle: existing.postTitle,
-                  officeTel: existing.officeTel,
-                  validFrom: existing.lastUploadDate || uploadDate,
-                  validTo: uploadDate,
-                  uploadId: existing.uploadId
-                });
-                
-                batch.update(db.collection('staff').doc(existing.id), {
-                  ...staff,
-                  previousOffice: existing.office,
-                  previousTeam: existing.team,
-                  previousDepartment: existing.department,
-                  changedDate: uploadDate,
-                  isNew: false,
-                  isActive: true
-                });
-                
-                updatedStaff.push({ old: existing, new: staff });
-              } else {
-                batch.update(db.collection('staff').doc(existing.id), {
-                  lastUploadDate: uploadDate,
-                  uploadId: uploadId,
-                  isActive: true
-                });
-                unchangedStaff.push(staff);
-              }
-              
-              existingStaffMap.delete(staff.normalizedName);
-            } else {
-              const docRef = db.collection('staff').doc();
-              batch.set(docRef, {
-                ...staff,
-                createdDate: uploadDate,
-                isNew: true,
-                isActive: true
-              });
-              newStaff.push(staff);
-            }
-          }
-          
-          const removedStaff = [];
-          existingStaffMap.forEach((existing, key) => {
+          if (changed) {
             const historyRef = db.collection('staffHistory').doc();
             batch.set(historyRef, {
               staffId: existing.id,
               fullName: existing.fullName,
               department: existing.department,
               office: existing.office,
-              team: existing.team,
+              team: existing.team || '', // Ensure team is never undefined in history
               postTitle: existing.postTitle,
               officeTel: existing.officeTel,
-              validFrom: existing.lastUploadDate || existing.createdDate,
+              validFrom: existing.lastUploadDate || uploadDate,
               validTo: uploadDate,
-              uploadId: existing.uploadId,
-              status: 'removed'
+              uploadId: existing.uploadId || ''
             });
             
             batch.update(db.collection('staff').doc(existing.id), {
-              isActive: false,
-              removedDate: uploadDate
+              ...staff,
+              previousOffice: existing.office || '',
+              previousTeam: existing.team || '',
+              previousDepartment: existing.department || '',
+              changedDate: uploadDate,
+              isNew: false,
+              isActive: true
             });
             
-            removedStaff.push(existing);
-          });
-          
-          const uploadRef = db.collection('uploads').doc();
-          batch.set(uploadRef, {
-            uploadId: uploadId,
-            uploadDate: uploadDate,
-            fileName: file.name,
-            totalRecords: staffData.length,
-            newCount: newStaff.length,
-            updatedCount: updatedStaff.length,
-            unchangedCount: unchangedStaff.length,
-            removedCount: removedStaff.length
-          });
-          
-          await batch.commit();
-          
-          let statusMessage = `✅ Upload complete (${new Date(uploadDate).toLocaleString()}):\n`;
-          statusMessage += `• ${newStaff.length} new staff added\n`;
-          statusMessage += `• ${updatedStaff.length} staff updated\n`;
-          statusMessage += `• ${unchangedStaff.length} staff unchanged\n`;
-          statusMessage += `• ${removedStaff.length} staff removed`;
-          
-          showStatus(status, 'success', statusMessage);
-          
-          if (updatedStaff.length > 0 || removedStaff.length > 0) {
-            showUploadChanges(newStaff, updatedStaff, removedStaff);
+            updatedStaff.push({ old: existing, new: staff });
+          } else {
+            batch.update(db.collection('staff').doc(existing.id), {
+              lastUploadDate: uploadDate,
+              uploadId: uploadId,
+              isActive: true
+            });
+            unchangedStaff.push(staff);
           }
           
-          fileInput.value = '';
-          await loadAllData();
-          
-        } catch (error) {
-          showStatus(status, 'error', `❌ Error: ${error.message}`);
+          existingStaffMap.delete(staff.normalizedName);
+        } else {
+          const docRef = db.collection('staff').doc();
+          batch.set(docRef, {
+            ...staff,
+            createdDate: uploadDate,
+            isNew: true,
+            isActive: true
+          });
+          newStaff.push(staff);
         }
-      };
+      }
       
-      reader.readAsText(file);
+      const removedStaff = [];
+      existingStaffMap.forEach((existing, key) => {
+        const historyRef = db.collection('staffHistory').doc();
+        batch.set(historyRef, {
+          staffId: existing.id,
+          fullName: existing.fullName,
+          department: existing.department,
+          office: existing.office || '',
+          team: existing.team || '', // Ensure team is never undefined
+          postTitle: existing.postTitle,
+          officeTel: existing.officeTel || '',
+          validFrom: existing.lastUploadDate || existing.createdDate,
+          validTo: uploadDate,
+          uploadId: existing.uploadId || '',
+          status: 'removed'
+        });
+        
+        batch.update(db.collection('staff').doc(existing.id), {
+          isActive: false,
+          removedDate: uploadDate
+        });
+        
+        removedStaff.push(existing);
+      });
+      
+      const uploadRef = db.collection('uploads').doc();
+      batch.set(uploadRef, {
+        uploadId: uploadId,
+        uploadDate: uploadDate,
+        fileName: file.name,
+        totalRecords: staffData.length,
+        newCount: newStaff.length,
+        updatedCount: updatedStaff.length,
+        unchangedCount: unchangedStaff.length,
+        removedCount: removedStaff.length
+      });
+      
+      await batch.commit();
+      
+      let statusMessage = `✅ Upload complete (${new Date(uploadDate).toLocaleString()}):\n`;
+      statusMessage += `• ${newStaff.length} new staff added\n`;
+      statusMessage += `• ${updatedStaff.length} staff updated\n`;
+      statusMessage += `• ${unchangedStaff.length} staff unchanged\n`;
+      statusMessage += `• ${removedStaff.length} staff removed`;
+      
+      showStatus(status, 'success', statusMessage);
+      
+      if (updatedStaff.length > 0 || removedStaff.length > 0) {
+        showUploadChanges(newStaff, updatedStaff, removedStaff);
+      }
+      
+      fileInput.value = '';
+      await loadAllData();
+      
+    } catch (error) {
+      showStatus(status, 'error', `❌ Error: ${error.message}`);
     }
-
+  };
+  
+  reader.readAsText(file);
+}
     // Show upload changes
     function showUploadChanges(newStaff, updatedStaff, removedStaff) {
       const modal = document.getElementById('editModal');
